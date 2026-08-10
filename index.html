@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>البراء للحوم المجمدة والمصنعات</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f8f9fa; font-family: sans-serif; padding-bottom: 90px; }
+    .header-bg { background-color: #8b0000; color: white; }
+    .card-product { border-radius: 12px; border: 1px solid #e0e0e0; background: #fff; overflow: hidden; }
+    .product-img { height: 130px; object-fit: cover; width: 100%; }
+    .logo-img { height: 40px; width: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
+    .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- الهيدر -->
+  <header class="header-bg p-3 shadow-sm sticky-top">
+    <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <img id="store-logo" src="https://via.placeholder.com/100?text=Logo" class="logo-img">
+        <h5 class="m-0 font-weight-bold text-white">البراء للحوم المجمدة والمصنعات</h5>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="tel:01016462078" class="btn btn-warning btn-sm rounded-pill fw-bold"><i class="fa-solid fa-phone"></i> 01016462078</a>
+        <a href="https://wa.me/201004496451" target="_blank" class="btn btn-success btn-sm rounded-pill fw-bold"><i class="fa-brands fa-whatsapp"></i> واتساب 1</a>
+        <a href="https://wa.me/201500449107" target="_blank" class="btn btn-success btn-sm rounded-pill fw-bold"><i class="fa-brands fa-whatsapp"></i> واتساب 2</a>
+        <button id="open-admin-btn" class="btn btn-dark btn-sm rounded-pill"><i class="fa-solid fa-lock"></i> الإدارة</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- عرض المنتجات -->
+  <div class="container mt-3">
+    <h5 class="fw-bold border-start border-4 border-danger ps-2 mb-3">قائمة المنتجات</h5>
+    <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2"></div>
+  </div>
+
+  <!-- السلة -->
+  <div class="cart-bar shadow-lg">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div>
+        <small class="text-muted d-block">إجمالي حسابك:</small>
+        <span id="cart-total" class="h5 fw-bold text-danger m-0">0 ج.م</span>
+        <span id="cart-count" class="badge bg-danger rounded-pill ms-1">(0 صنف)</span>
+      </div>
+      <button id="send-whatsapp-btn" class="btn btn-success fw-bold">
+        <i class="fa-brands fa-whatsapp me-1"></i> إرسال الطلب
+      </button>
+    </div>
+  </div>
+
+  <!-- لوحة التحكم -->
+  <div class="modal fade" id="adminModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger fw-bold">لوحة تحكم المحل</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="admin-login-view">
+            <input type="password" id="admin-pass" placeholder="كلمة السر (123456)" class="form-control mb-2">
+            <button id="login-admin-btn" class="btn btn-danger w-100 fw-bold">دخول</button>
+          </div>
+          
+          <div id="admin-dashboard-view" class="d-none">
+            <div class="card p-3 mb-3 bg-light">
+              <h6 class="fw-bold text-primary mb-2" id="form-title">إضافة منتج جديد</h6>
+              <input type="hidden" id="edit-doc-id">
+              <input type="text" id="p-name" placeholder="اسم المنتج" class="form-control mb-2">
+              <div class="row g-2 mb-2">
+                <div class="col"><input type="number" id="p-price" placeholder="السعر" class="form-control"></div>
+                <div class="col"><input type="text" id="p-weight" placeholder="الوزن (مثلاً: 1 كجم)" class="form-control"></div>
+              </div>
+              <input type="text" id="p-img-url" placeholder="رابط صورة أونلاين (اختياري)" class="form-control mb-2">
+              <div class="mb-2">
+                <label class="small text-muted fw-bold">أو اختر صورة من جهازك:</label>
+                <input type="file" id="p-img-file" accept="image/*" class="form-control">
+              </div>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="p-available" checked>
+                <label class="form-check-label">متوفر للبيع 🟢</label>
+              </div>
+              <button id="save-product-btn" class="btn btn-success w-100 fw-bold mb-2">حفظ المنتج بسرعة 🚀</button>
+              <button id="reset-form-btn" class="btn btn-outline-secondary w-100 btn-sm">إلغاء التعديل</button>
+            </div>
+
+            <h6 class="fw-bold">إدارة المنتجات (تعديل / حذف):</h6>
+            <div id="admin-products-list" class="list-group mb-3"></div>
+            <button id="logout-admin-btn" class="btn btn-secondary btn-sm w-100">تسجيل خروج</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHzA4NFFr1R18a-zWJweXk3QgBJWnSkbM",
+      authDomain: "albaraameat-a6163.firebaseapp.com",
+      projectId: "albaraameat-a6163",
+      storageBucket: "albaraameat-a6163.firebasestorage.app",
+      messagingSenderId: "825098464475",
+      appId: "1:825098464475:web:e49118813a9e0113c6b0fe"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let cart = [];
+    const adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
+
+    function compressImage(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const max_size = 500;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > max_size) { height *= max_size / width; width = max_size; }
+            } else {
+              if (height > max_size) { width *= max_size / height; height = max_size; }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.6));
+          };
+        };
+      });
+    }
+
+    onSnapshot(collection(db, "products"), (snapshot) => {
+      const grid = document.getElementById('products-grid');
+      const adminList = document.getElementById('admin-products-list');
+      grid.innerHTML = '';
+      adminList.innerHTML = '';
+
+      snapshot.forEach((docSnap) => {
+        const p = docSnap.data();
+        const id = docSnap.id;
+
+        const col = document.createElement('div');
+        col.className = 'col';
+        col.innerHTML = `
+          <div class="card-product p-2 h-100 d-flex flex-column justify-content-between shadow-sm">
+            <div>
+              <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img rounded mb-2">
+              <span class="badge ${p.available ? 'bg-success' : 'bg-danger'} mb-1">${p.available ? 'متوفر' : 'غير متوفر'}</span>
+              <h6 class="fw-bold mb-1">${p.name}</h6>
+              <small class="text-muted d-block">${p.weight || ''}</small>
+              <div class="text-danger fw-bold mt-1">${p.price} ج.م</div>
+            </div>
+            <button class="add-cart-btn btn btn-sm ${p.available ? 'btn-danger fw-bold' : 'btn-secondary'} w-100 mt-2" ${!p.available ? 'disabled' : ''}>
+              + إضافة للسلة
+            </button>
+          </div>`;
+
+        col.querySelector('.add-cart-btn').addEventListener('click', () => addToCart(p.name, p.price));
+        grid.appendChild(col);
+
+        const item = document.createElement('div');
+        item.className = 'list-group-item d-flex justify-content-between align-items-center';
+        item.innerHTML = `
+          <div><strong>${p.name}</strong> - <span class="text-danger">${p.price} ج.م</span></div>
+          <div>
+            <button class="edit-btn btn btn-warning btn-sm me-1"><i class="fa-solid fa-pen"></i></button>
+            <button class="delete-btn btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+
+        item.querySelector('.edit-btn').addEventListener('click', () => editProduct(id, p.name, p.price, p.weight, p.img, p.available));
+        item.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(id));
+        adminList.appendChild(item);
+      });
+    });
+
+    async function saveProduct() {
+      const id = document.getElementById('edit-doc-id').value;
+      const name = document.getElementById('p-name').value;
+      const price = Number(document.getElementById('p-price').value);
+      const weight = document.getElementById('p-weight').value;
+      const available = document.getElementById('p-available').checked;
+      let img = document.getElementById('p-img-url').value;
+      const fileInput = document.getElementById('p-img-file');
+
+      if (!name || !price) return alert("يرجى كتابة الاسم والسعر!");
+
+      if (fileInput.files[0]) {
+        img = await compressImage(fileInput.files[0]);
+      }
+
+      if (id) {
+        await updateDoc(doc(db, "products", id), { name, price, weight, available, img });
+      } else {
+        await addDoc(collection(db, "products"), { name, price, weight, available, img });
+      }
+
+      alert("تم الحفظ بنجاح!");
+      resetForm();
+    }
+
+    function editProduct(id, name, price, weight, img, available) {
+      document.getElementById('edit-doc-id').value = id;
+      document.getElementById('p-name').value = name;
+      document.getElementById('p-price').value = price;
+      document.getElementById('p-weight').value = weight || '';
+      document.getElementById('p-img-url').value = img || '';
+      document.getElementById('p-available').checked = available;
+      document.getElementById('form-title').innerText = "تعديل منتج";
+      document.getElementById('save-product-btn').innerText = "تحديث البيانات";
+    }
+
+    async function deleteProduct(id) {
+      if (confirm("هل أنت تأكد من الحذف؟")) await deleteDoc(doc(db, "products", id));
+    }
+
+    function resetForm() {
+      document.getElementById('edit-doc-id').value = '';
+      document.getElementById('p-name').value = '';
+      document.getElementById('p-price').value = '';
+      document.getElementById('p-weight').value = '';
+      document.getElementById('p-img-url').value = '';
+      document.getElementById('p-img-file').value = '';
+      document.getElementById('form-title').innerText = "إضافة منتج جديد";
+      document.getElementById('save-product-btn').innerText = "حفظ المنتج بسرعة 🚀";
+    }
+
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('cart-total').innerText = total + ' ج.م';
+      document.getElementById('cart-count').innerText = `(${cart.length} صنف)`;
+    }
+
+    function sendOrderToWhatsApp() {
+      if (cart.length === 0) return alert("السلة فارغة!");
+      let text = "طلب جديد من الموقع الإلكتروني:\n\n";
+      cart.forEach((item, index) => { text += `${index + 1}. ${item.name} - ${item.price} ج.م\n`; });
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      text += `\nالإجمالي: ${total} ج.م`;
+      window.open(`https://wa.me/201004496451?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    // ربط الأحداث والأزرار
+    document.getElementById('open-admin-btn').addEventListener('click', () => adminModal.show());
+    document.getElementById('save-product-btn').addEventListener('click', saveProduct);
+    document.getElementById('reset-form-btn').addEventListener('click', resetForm);
+    document.getElementById('send-whatsapp-btn').addEventListener('click', sendOrderToWhatsApp);
+
+    document.getElementById('login-admin-btn').addEventListener('click', () => {
+      if (document.getElementById('admin-pass').value === '123456') {
+        document.getElementById('admin-login-view').classList.add('d-none');
+        document.getElementById('admin-dashboard-view').classList.remove('d-none');
+      } else {
+        alert("كلمة السر خاطئة!");
+      }
+    });
+
+    document.getElementById('logout-admin-btn').addEventListener('click', () => {
+      document.getElementById('admin-login-view').classList.remove('d-none');
+      document.getElementById('admin-dashboard-view').classList.add('d-none');
+      document.getElementById('admin-pass').value = '';
+    });
+  </script>
+</body>
+</html>
+
+
