@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>البراء للحوم المجمدة والمصنعات</title>
+  <title id="page-title">البراء للحوم المجمدة والمصنعات</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -11,7 +11,7 @@
     .header-bg { background-color: #8b0000; color: white; }
     .card-product { border-radius: 12px; border: 1px solid #e0e0e0; background: #fff; overflow: hidden; }
     .product-img { height: 130px; object-fit: cover; width: 100%; }
-    .logo-img { height: 40px; width: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
+    .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
   </style>
 </head>
@@ -22,7 +22,10 @@
     <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
       <div class="d-flex align-items-center gap-2">
         <img id="store-logo" src="https://via.placeholder.com/100?text=Logo" class="logo-img">
-        <h5 class="m-0 font-weight-bold text-white">البراء للحوم المجمدة والمصنعات</h5>
+        <div>
+          <h5 id="store-name-display" class="m-0 font-weight-bold text-white">البراء للحوم المجمدة والمصنعات</h5>
+          <small id="store-desc-display" class="text-warning d-block" style="font-size: 0.8rem;">أعلى جودة وأفضل سعر</small>
+        </div>
       </div>
       <div class="d-flex flex-wrap gap-2">
         <a href="tel:01016462078" class="btn btn-warning btn-sm rounded-pill fw-bold"><i class="fa-solid fa-phone"></i> 01016462078</a>
@@ -63,11 +66,43 @@
         </div>
         <div class="modal-body">
           <div id="admin-login-view">
-            <input type="password" id="admin-pass" placeholder="كلمة السر (123456)" class="form-control mb-2">
+            <input type="password" id="admin-pass" placeholder="كلمة السر" class="form-control mb-2">
             <button id="login-admin-btn" class="btn btn-danger w-100 fw-bold">دخول</button>
           </div>
           
           <div id="admin-dashboard-view" class="d-none">
+            
+            <!-- قسم إعدادات المتجر العامة -->
+            <div class="card p-3 mb-3 bg-white border-warning shadow-sm">
+              <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-gear text-warning me-1"></i> إعدادات المحل والبروفايل:</h6>
+              <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                  <label class="small text-muted fw-bold">اسم المحل:</label>
+                  <input type="text" id="setting-store-name" placeholder="اسم المحل" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="small text-muted fw-bold">الوصف:</label>
+                  <input type="text" id="setting-store-desc" placeholder="وصف المحل" class="form-control">
+                </div>
+              </div>
+              
+              <div class="mb-2">
+                <label class="small text-muted fw-bold">تغيير صورة البروفايل (اللوجو):</label>
+                <input type="file" id="setting-logo-file" accept="image/*" class="form-control mb-1">
+                <input type="text" id="setting-logo-url" placeholder="أو حط رابط صورة اللوجو هنا" class="form-control">
+              </div>
+
+              <div class="mb-2">
+                <label class="small text-muted fw-bold">تغيير كلمة السر الخاصة بالإدارة:</label>
+                <input type="password" id="setting-new-pass" placeholder="كلمة السر الجديدة" class="form-control">
+              </div>
+
+              <button id="save-settings-btn" class="btn btn-warning w-100 fw-bold mt-1">حفظ إعدادات البروفايل ⚙️</button>
+            </div>
+
+            <hr>
+
+            <!-- قسم إضافة وتعديل المنتجات -->
             <div class="card p-3 mb-3 bg-light">
               <h6 class="fw-bold text-primary mb-2" id="form-title">إضافة منتج جديد</h6>
               <input type="hidden" id="edit-doc-id">
@@ -102,7 +137,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBHzA4NFFr1R18a-zWJweXk3QgBJWnSkbM",
@@ -117,6 +152,9 @@
     const db = getFirestore(app);
     let cart = [];
     const adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
+
+    // كلمة السر الافتراضية
+    let currentAdminPass = localStorage.getItem('adminPass') || '123456';
 
     function compressImage(file) {
       return new Promise((resolve) => {
@@ -145,6 +183,57 @@
       });
     }
 
+    // جلب وحفظ إعدادات البروفايل (الاسم، الوصف، اللوجو، كلمة السر) من وإلى Firebase
+    onSnapshot(doc(db, "settings", "store_info"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if(data.name) {
+          document.getElementById('store-name-display').innerText = data.name;
+          document.getElementById('page-title').innerText = data.name;
+          document.getElementById('setting-store-name').value = data.name;
+        }
+        if(data.desc) {
+          document.getElementById('store-desc-display').innerText = data.desc;
+          document.getElementById('setting-store-desc').value = data.desc;
+        }
+        if(data.logo) {
+          document.getElementById('store-logo').src = data.logo;
+          document.getElementById('setting-logo-url').value = data.logo;
+        }
+        if(data.pass) {
+          currentAdminPass = data.pass;
+          localStorage.setItem('adminPass', data.pass);
+        }
+      }
+    });
+
+    async function saveStoreSettings() {
+      const name = document.getElementById('setting-store-name').value;
+      const desc = document.getElementById('setting-store-desc').value;
+      let logo = document.getElementById('setting-logo-url').value;
+      const newPass = document.getElementById('setting-new-pass').value;
+      const logoFileInput = document.getElementById('setting-logo-file');
+
+      if (logoFileInput.files[0]) {
+        logo = await compressImage(logoFileInput.files[0]);
+      }
+
+      const settingsData = {};
+      if (name) settingsData.name = name;
+      if (desc) settingsData.desc = desc;
+      if (logo) settingsData.logo = logo;
+      if (newPass) {
+        settingsData.pass = newPass;
+        currentAdminPass = newPass;
+        localStorage.setItem('adminPass', newPass);
+      }
+
+      await setDoc(doc(db, "settings", "store_info"), settingsData, { merge: true });
+      alert("تم تحديث إعدادات المحل بنجاح! 🎉");
+      document.getElementById('setting-new-pass').value = '';
+    }
+
+    // عرض المنتجات
     onSnapshot(collection(db, "products"), (snapshot) => {
       const grid = document.getElementById('products-grid');
       const adminList = document.getElementById('admin-products-list');
@@ -261,9 +350,11 @@
     document.getElementById('save-product-btn').addEventListener('click', saveProduct);
     document.getElementById('reset-form-btn').addEventListener('click', resetForm);
     document.getElementById('send-whatsapp-btn').addEventListener('click', sendOrderToWhatsApp);
+    document.getElementById('save-settings-btn').addEventListener('click', saveStoreSettings);
 
     document.getElementById('login-admin-btn').addEventListener('click', () => {
-      if (document.getElementById('admin-pass').value === '123456') {
+      const inputPass = document.getElementById('admin-pass').value;
+      if (inputPass === currentAdminPass) {
         document.getElementById('admin-login-view').classList.add('d-none');
         document.getElementById('admin-dashboard-view').classList.remove('d-none');
       } else {
@@ -279,5 +370,3 @@
   </script>
 </body>
 </html>
-
-
