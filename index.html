@@ -37,10 +37,14 @@
     </div>
   </header>
 
-  <!-- شاشة عرض الصور الدوريه للمنتجات -->
-  <div class="container mt-3" id="carousel-section" style="display: none;">
-    <div id="productCarousel" class="carousel slide shadow-sm rounded-3 overflow-hidden" data-bs-ride="carousel" data-bs-interval="2500">
-      <div class="carousel-inner" id="carousel-items-container"></div>
+  <!-- شاشة العرض المتروكة (Slider) -->
+  <div class="container mt-3" id="carousel-section">
+    <div id="productCarousel" class="carousel slide shadow-sm rounded-3 overflow-hidden" data-bs-ride="carousel" data-bs-interval="3000">
+      <div class="carousel-inner" id="carousel-items-container">
+        <div class="carousel-item active">
+          <div class="bg-secondary text-white p-4 text-center rounded">أهلاً بكم في متجر البراء للحوم والمصنعات 🥩</div>
+        </div>
+      </div>
       <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon"></span>
       </button>
@@ -50,15 +54,14 @@
     </div>
   </div>
 
-  <!-- عرض الأقسام والمنتجات -->
+  <!-- الأقسام والمنتجات -->
   <div class="container mt-3">
-    <!-- أزرار الأقسام -->
     <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="category-buttons">
-      <button class="btn btn-outline-danger active rounded-pill text-nowrap filter-category-btn" data-category="الكل">الكل 🛒</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="لحوم">لحوم 🥩</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="مصنعات لحوم">مصنعات لحوم 🍔</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="مصنعات فراخ">مصنعات فراخ 🍗</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="أطباق مشكل">أطباق مشكل 🍲</button>
+      <button class="btn btn-outline-danger active rounded-pill text-nowrap filter-btn" onclick="filterCat('الكل', this)">الكل 🛒</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('لحوم', this)">لحوم 🥩</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('مصنعات لحوم', this)">مصنعات لحوم 🍔</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('مصنعات فراخ', this)">مصنعات فراخ 🍗</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('أطباق مشكل', this)">أطباق مشكل 🍲</button>
     </div>
 
     <h5 class="fw-bold border-start border-4 border-danger ps-2 mb-3" id="category-title">قائمة المنتجات</h5>
@@ -79,8 +82,8 @@
     </div>
   </div>
 
-  <!-- نافذة تفاصيل السلة وبيانات العميل -->
-  <div class="modal fade" id="cartModal" tabindex="-1">
+  <!-- نافذة السلة -->
+  <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -112,8 +115,8 @@
     </div>
   </div>
 
-  <!-- لوحة التحكم -->
-  <div class="modal fade" id="adminModal" tabindex="-1">
+  <!-- نافذة لوحة التحكم -->
+  <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -219,14 +222,15 @@
     let allProducts = [];
     let currentSelectedCategory = "الكل";
 
-    let adminModal, cartModal;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
-      cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-    });
-
     let currentAdminPass = localStorage.getItem('adminPass') || '123456';
+
+    window.filterCat = function(catName, btnElement) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if(btnElement) btnElement.classList.add('active');
+      currentSelectedCategory = catName;
+      document.getElementById('category-title').innerText = catName === 'الكل' ? 'قائمة المنتجات' : `قسم ${catName}`;
+      renderProducts();
+    };
 
     function compressImage(file) {
       return new Promise((resolve) => {
@@ -255,82 +259,67 @@
       });
     }
 
-    // جلب الإعدادات
-    onSnapshot(doc(db, "settings", "store_info"), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if(data.name) {
-          document.getElementById('store-name-display').innerText = data.name;
-          document.getElementById('page-title').innerText = data.name;
-          document.getElementById('setting-store-name').value = data.name;
+    // جلب الإعدادات العامة
+    try {
+      onSnapshot(doc(db, "settings", "store_info"), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if(data.name) {
+            document.getElementById('store-name-display').innerText = data.name;
+            document.getElementById('page-title').innerText = data.name;
+            document.getElementById('setting-store-name').value = data.name;
+          }
+          if(data.desc) {
+            document.getElementById('store-desc-display').innerText = data.desc;
+            document.getElementById('setting-store-desc').value = data.desc;
+          }
+          if(data.logo) {
+            document.getElementById('store-logo').src = data.logo;
+            document.getElementById('setting-logo-url').value = data.logo;
+          }
+          if(data.pass) {
+            currentAdminPass = data.pass;
+            localStorage.setItem('adminPass', data.pass);
+          }
         }
-        if(data.desc) {
-          document.getElementById('store-desc-display').innerText = data.desc;
-          document.getElementById('setting-store-desc').value = data.desc;
-        }
-        if(data.logo) {
-          document.getElementById('store-logo').src = data.logo;
-          document.getElementById('setting-logo-url').value = data.logo;
-        }
-        if(data.pass) {
-          currentAdminPass = data.pass;
-          localStorage.setItem('adminPass', data.pass);
-        }
-      }
-    });
-
-    async function saveStoreSettings() {
-      const name = document.getElementById('setting-store-name').value;
-      const desc = document.getElementById('setting-store-desc').value;
-      let logo = document.getElementById('setting-logo-url').value;
-      const newPass = document.getElementById('setting-new-pass').value;
-      const logoFileInput = document.getElementById('setting-logo-file');
-
-      if (logoFileInput.files[0]) {
-        logo = await compressImage(logoFileInput.files[0]);
-      }
-
-      const settingsData = {};
-      if (name) settingsData.name = name;
-      if (desc) settingsData.desc = desc;
-      if (logo) settingsData.logo = logo;
-      if (newPass) {
-        settingsData.pass = newPass;
-        currentAdminPass = newPass;
-        localStorage.setItem('adminPass', newPass);
-      }
-
-      await setDoc(doc(db, "settings", "store_info"), settingsData, { merge: true });
-      alert("تم تحديث إعدادات المحل بنجاح! 🎉");
-      document.getElementById('setting-new-pass').value = '';
-    }
-
-    // جلب كل المنتجات القديمة والجديدة
-    onSnapshot(collection(db, "products"), (snapshot) => {
-      allProducts = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        // التأكد من وجود قسم حتى للمنتجات القديمة
-        data.category = data.category || "لحوم";
-        allProducts.push({ id: docSnap.id, ...data });
       });
+    } catch(e) { console.log(e); }
 
-      renderProducts();
-      renderCarousel();
-      renderAdminProductsList();
-    });
+    // جلب كافة المنتجات
+    try {
+      onSnapshot(collection(db, "products"), (snapshot) => {
+        allProducts = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          allProducts.push({
+            id: docSnap.id,
+            name: data.name || "منتج بدون اسم",
+            price: data.price || 0,
+            weight: data.weight || "",
+            category: data.category || "لحوم",
+            img: data.img || "",
+            available: data.available !== undefined ? data.available : true
+          });
+        });
+
+        renderProducts();
+        renderCarousel();
+        renderAdminProductsList();
+      });
+    } catch(e) { console.log(e); }
 
     function renderCarousel() {
       const carouselContainer = document.getElementById('carousel-items-container');
-      const carouselSection = document.getElementById('carousel-section');
-      const activeProducts = allProducts.filter(p => p.available && p.img && p.img.trim() !== '');
+      const activeProducts = allProducts.filter(p => p.available && p.img && p.img.length > 5);
       
       if (activeProducts.length === 0) {
-        carouselSection.style.display = 'none';
+        carouselContainer.innerHTML = `
+          <div class="carousel-item active">
+            <div class="bg-danger text-white p-3 text-center rounded fw-bold">أهلاً بكم في متجر البراء للحوم والمصنعات ✨</div>
+          </div>`;
         return;
       }
 
-      carouselSection.style.display = 'block';
       carouselContainer.innerHTML = '';
       activeProducts.forEach((p, index) => {
         const item = document.createElement('div');
@@ -351,7 +340,7 @@
 
       const filtered = currentSelectedCategory === "الكل" 
         ? allProducts 
-        : allProducts.filter(p => (p.category || "لحوم") === currentSelectedCategory);
+        : allProducts.filter(p => p.category === currentSelectedCategory);
 
       if (filtered.length === 0) {
         grid.innerHTML = `<div class="col-12 text-center text-muted py-4">لا توجد منتجات حالياً في هذا القسم.</div>`;
@@ -367,10 +356,10 @@
               <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img rounded mb-2">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge ${p.available ? 'bg-success' : 'bg-danger'}">${p.available ? 'متوفر' : 'غير متوفر'}</span>
-                <small class="badge bg-light text-dark border">${p.category || 'لحوم'}</small>
+                <small class="badge bg-light text-dark border">${p.category}</small>
               </div>
               <h6 class="fw-bold mb-1">${p.name}</h6>
-              <small class="text-muted d-block">${p.weight || ''}</small>
+              <small class="text-muted d-block">${p.weight}</small>
               <div class="text-danger fw-bold mt-1">${p.price} ج.م</div>
             </div>
             <button class="add-cart-btn btn btn-sm ${p.available ? 'btn-danger fw-bold' : 'btn-secondary'} w-100 mt-2" ${!p.available ? 'disabled' : ''}>
@@ -391,7 +380,7 @@
         item.className = 'list-group-item d-flex justify-content-between align-items-center';
         item.innerHTML = `
           <div>
-            <strong>${p.name}</strong> (${p.category || 'لحوم'}) 
+            <strong>${p.name}</strong> (${p.category}) 
             - <span class="text-danger">${p.price} ج.م</span>
           </div>
           <div>
@@ -405,18 +394,36 @@
       });
     }
 
-    document.querySelectorAll('.filter-category-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.filter-category-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        currentSelectedCategory = e.target.getAttribute('data-category');
-        document.getElementById('category-title').innerText = currentSelectedCategory === 'الكل' ? 'قائمة المنتجات' : `قسم ${currentSelectedCategory}`;
-        renderProducts();
-      });
-    });
-
     function addToCart(name, price) {
       const existing = cart.find(item => item.name === name);
       if (existing) {
         existing.count += 1;
-  
+      } else {
+        cart.push({ name, price, count: 1 });
+      }
+      updateCartUI();
+    }
+
+    function changeQuantity(index, delta) {
+      cart[index].count += delta;
+      if (cart[index].count <= 0) {
+        cart.splice(index, 1);
+      }
+      updateCartUI();
+      renderCartModal();
+    }
+
+    function updateCartUI() {
+      const totalCount = cart.reduce((sum, item) => sum + item.count, 0);
+      const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.count), 0);
+
+      document.getElementById('cart-total').innerText = totalPrice + ' ج.م';
+      document.getElementById('cart-modal-total').innerText = totalPrice + ' ج.م';
+      document.getElementById('cart-count').innerText = `(${totalCount} صنف)`;
+    }
+
+    function renderCartModal() {
+      const cartList = document.getElementById('cart-items-list');
+      cartList.innerHTML = '';
+
+      if 
