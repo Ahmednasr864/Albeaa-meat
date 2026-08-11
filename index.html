@@ -13,7 +13,7 @@
     .product-img { height: 130px; object-fit: cover; width: 100%; }
     .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
-    .carousel-item img { height: 180px; object-fit: cover; border-radius: 12px; }
+    .banner-box { background: linear-gradient(135deg, #8b0000, #d9534f); color: white; border-radius: 12px; padding: 15px; text-align: center; }
   </style>
 </head>
 <body>
@@ -32,40 +32,32 @@
         <a href="tel:01016462078" class="btn btn-warning btn-sm rounded-pill fw-bold"><i class="fa-solid fa-phone"></i> 01016462078</a>
         <a href="https://wa.me/201004496451" target="_blank" class="btn btn-success btn-sm rounded-pill fw-bold"><i class="fa-brands fa-whatsapp"></i> واتساب 1</a>
         <a href="https://wa.me/201500449107" target="_blank" class="btn btn-success btn-sm rounded-pill fw-bold"><i class="fa-brands fa-whatsapp"></i> واتساب 2</a>
-        <button id="open-admin-btn" class="btn btn-dark btn-sm rounded-pill"><i class="fa-solid fa-lock"></i> الإدارة</button>
+        <button onclick="openAdminModal()" class="btn btn-dark btn-sm rounded-pill"><i class="fa-solid fa-lock"></i> الإدارة</button>
       </div>
     </div>
   </header>
 
-  <!-- شاشة العرض المتروكة (Slider) -->
-  <div class="container mt-3" id="carousel-section">
-    <div id="productCarousel" class="carousel slide shadow-sm rounded-3 overflow-hidden" data-bs-ride="carousel" data-bs-interval="3000">
-      <div class="carousel-inner" id="carousel-items-container">
-        <div class="carousel-item active">
-          <div class="bg-secondary text-white p-4 text-center rounded">أهلاً بكم في متجر البراء للحوم والمصنعات 🥩</div>
-        </div>
-      </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-      </button>
+  <!-- بنر الترحيب والعروض -->
+  <div class="container mt-3">
+    <div class="banner-box shadow-sm">
+      <h6 class="m-0 fw-bold">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
     </div>
   </div>
 
   <!-- الأقسام والمنتجات -->
   <div class="container mt-3">
-    <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="category-buttons">
-      <button class="btn btn-outline-danger active rounded-pill text-nowrap filter-btn" onclick="filterCat('الكل', this)">الكل 🛒</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('لحوم', this)">لحوم 🥩</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('مصنعات لحوم', this)">مصنعات لحوم 🍔</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('مصنعات فراخ', this)">مصنعات فراخ 🍗</button>
-      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCat('أطباق مشكل', this)">أطباق مشكل 🍲</button>
+    <div class="d-flex gap-2 overflow-auto pb-2 mb-3">
+      <button class="btn btn-outline-danger active rounded-pill text-nowrap filter-btn" onclick="filterCategory('الكل', this)">الكل 🛒</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCategory('لحوم', this)">لحوم 🥩</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCategory('مصنعات لحوم', this)">مصنعات لحوم 🍔</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCategory('مصنعات فراخ', this)">مصنعات فراخ 🍗</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-btn" onclick="filterCategory('أطباق مشكل', this)">أطباق مشكل 🍲</button>
     </div>
 
     <h5 class="fw-bold border-start border-4 border-danger ps-2 mb-3" id="category-title">قائمة المنتجات</h5>
-    <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2"></div>
+    <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2">
+      <div class="col-12 text-center text-muted py-5" id="loading-msg">جاري تحميل المنتجات... ⏳</div>
+    </div>
   </div>
 
   <!-- السلة السفلية -->
@@ -76,14 +68,14 @@
         <span id="cart-total" class="h5 fw-bold text-danger m-0">0 ج.م</span>
         <span id="cart-count" class="badge bg-danger rounded-pill ms-1">(0 صنف)</span>
       </div>
-      <button class="btn btn-success fw-bold" id="open-cart-modal-btn">
+      <button class="btn btn-success fw-bold" onclick="openCartModal()">
         <i class="fa-solid fa-cart-shopping me-1"></i> استكمال الطلب
       </button>
     </div>
   </div>
 
   <!-- نافذة السلة -->
-  <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="cartModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -107,7 +99,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
-          <button type="button" id="send-whatsapp-btn" class="btn btn-success fw-bold">
+          <button type="button" onclick="sendOrderToWhatsApp()" class="btn btn-success fw-bold">
             <i class="fa-brands fa-whatsapp me-1"></i> تأكيد وإرسال للواتساب
           </button>
         </div>
@@ -116,7 +108,7 @@
   </div>
 
   <!-- نافذة لوحة التحكم -->
-  <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="adminModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -126,39 +118,10 @@
         <div class="modal-body">
           <div id="admin-login-view">
             <input type="password" id="admin-pass" placeholder="كلمة السر" class="form-control mb-2">
-            <button id="login-admin-btn" class="btn btn-danger w-100 fw-bold">دخول</button>
+            <button onclick="loginAdmin()" class="btn btn-danger w-100 fw-bold">دخول</button>
           </div>
           
           <div id="admin-dashboard-view" class="d-none">
-            <div class="card p-3 mb-3 bg-white border-warning shadow-sm">
-              <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-gear text-warning me-1"></i> إعدادات المحل والبروفايل:</h6>
-              <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                  <label class="small text-muted fw-bold">اسم المحل:</label>
-                  <input type="text" id="setting-store-name" placeholder="اسم المحل" class="form-control">
-                </div>
-                <div class="col-md-6">
-                  <label class="small text-muted fw-bold">الوصف:</label>
-                  <input type="text" id="setting-store-desc" placeholder="وصف المحل" class="form-control">
-                </div>
-              </div>
-              
-              <div class="mb-2">
-                <label class="small text-muted fw-bold">تغيير صورة البروفايل (اللوجو):</label>
-                <input type="file" id="setting-logo-file" accept="image/*" class="form-control mb-1">
-                <input type="text" id="setting-logo-url" placeholder="أو حط رابط صورة اللوجو هنا" class="form-control">
-              </div>
-
-              <div class="mb-2">
-                <label class="small text-muted fw-bold">تغيير كلمة السر الخاصة بالإدارة:</label>
-                <input type="password" id="setting-new-pass" placeholder="كلمة السر الجديدة" class="form-control">
-              </div>
-
-              <button id="save-settings-btn" class="btn btn-warning w-100 fw-bold mt-1">حفظ إعدادات البروفايل ⚙️</button>
-            </div>
-
-            <hr>
-
             <div class="card p-3 mb-3 bg-light">
               <h6 class="fw-bold text-primary mb-2" id="form-title">إضافة منتج جديد</h6>
               <input type="hidden" id="edit-doc-id">
@@ -178,22 +141,18 @@
                 </select>
               </div>
 
-              <input type="text" id="p-img-url" placeholder="رابط صورة أونلاين (اختياري)" class="form-control mb-2">
-              <div class="mb-2">
-                <label class="small text-muted fw-bold">أو اختر صورة من جهازك:</label>
-                <input type="file" id="p-img-file" accept="image/*" class="form-control">
-              </div>
+              <input type="text" id="p-img-url" placeholder="رابط صورة أونلاين" class="form-control mb-2">
               <div class="form-check mb-2">
                 <input class="form-check-input" type="checkbox" id="p-available" checked>
                 <label class="form-check-label">متوفر للبيع 🟢</label>
               </div>
-              <button id="save-product-btn" class="btn btn-success w-100 fw-bold mb-2">حفظ المنتج بسرعة 🚀</button>
-              <button id="reset-form-btn" class="btn btn-outline-secondary w-100 btn-sm">إلغاء التعديل</button>
+              <button onclick="saveProduct()" class="btn btn-success w-100 fw-bold mb-2">حفظ المنتج بسرعة 🚀</button>
+              <button onclick="resetForm()" class="btn btn-outline-secondary w-100 btn-sm">إلغاء التعديل</button>
             </div>
 
             <h6 class="fw-bold">إدارة المنتجات (تعديل / حذف):</h6>
             <div id="admin-products-list" class="list-group mb-3"></div>
-            <button id="logout-admin-btn" class="btn btn-secondary btn-sm w-100">تسجيل خروج</button>
+            <button onclick="logoutAdmin()" class="btn btn-secondary btn-sm w-100">تسجيل خروج</button>
           </div>
         </div>
       </div>
@@ -202,136 +161,51 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <script>
+    const PROJECT_ID = "albaraameat-a6163";
+    const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/products`;
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBHzA4NFFr1R18a-zWJweXk3QgBJWnSkbM",
-      authDomain: "albaraameat-a6163.firebaseapp.com",
-      projectId: "albaraameat-a6163",
-      storageBucket: "albaraameat-a6163.firebasestorage.app",
-      messagingSenderId: "825098464475",
-      appId: "1:825098464475:web:e49118813a9e0113c6b0fe"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    
     let cart = [];
     let allProducts = [];
     let currentSelectedCategory = "الكل";
+    let adminPass = "123456";
 
-    let currentAdminPass = localStorage.getItem('adminPass') || '123456';
+    let adminModal, cartModal;
 
-    window.filterCat = function(catName, btnElement) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      if(btnElement) btnElement.classList.add('active');
-      currentSelectedCategory = catName;
-      document.getElementById('category-title').innerText = catName === 'الكل' ? 'قائمة المنتجات' : `قسم ${catName}`;
-      renderProducts();
-    };
+    document.addEventListener("DOMContentLoaded", () => {
+      adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
+      cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+      loadProducts();
+    });
 
-    function compressImage(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-          const img = new Image();
-          img.src = e.target.result;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const max_size = 500;
-            let width = img.width;
-            let height = img.height;
-            if (width > height) {
-              if (width > max_size) { height *= max_size / width; width = max_size; }
-            } else {
-              if (height > max_size) { width *= max_size / height; height = max_size; }
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.6));
-          };
-        };
-      });
-    }
-
-    // جلب الإعدادات العامة
-    try {
-      onSnapshot(doc(db, "settings", "store_info"), (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if(data.name) {
-            document.getElementById('store-name-display').innerText = data.name;
-            document.getElementById('page-title').innerText = data.name;
-            document.getElementById('setting-store-name').value = data.name;
-          }
-          if(data.desc) {
-            document.getElementById('store-desc-display').innerText = data.desc;
-            document.getElementById('setting-store-desc').value = data.desc;
-          }
-          if(data.logo) {
-            document.getElementById('store-logo').src = data.logo;
-            document.getElementById('setting-logo-url').value = data.logo;
-          }
-          if(data.pass) {
-            currentAdminPass = data.pass;
-            localStorage.setItem('adminPass', data.pass);
-          }
-        }
-      });
-    } catch(e) { console.log(e); }
-
-    // جلب كافة المنتجات
-    try {
-      onSnapshot(collection(db, "products"), (snapshot) => {
+    async function loadProducts() {
+      try {
+        const res = await fetch(FIRESTORE_URL);
+        const data = await res.json();
         allProducts = [];
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          allProducts.push({
-            id: docSnap.id,
-            name: data.name || "منتج بدون اسم",
-            price: data.price || 0,
-            weight: data.weight || "",
-            category: data.category || "لحوم",
-            img: data.img || "",
-            available: data.available !== undefined ? data.available : true
+
+        if (data.documents) {
+          data.documents.forEach(docItem => {
+            const fields = docItem.fields || {};
+            const docId = docItem.name.split('/').pop();
+
+            allProducts.push({
+              id: docId,
+              name: fields.name ? fields.name.stringValue : "منتج بدون اسم",
+              price: fields.price ? (fields.price.integerValue || fields.price.doubleValue || fields.price.stringValue) : 0,
+              weight: fields.weight ? fields.weight.stringValue : "",
+              category: fields.category ? fields.category.stringValue : "لحوم",
+              img: fields.img ? fields.img.stringValue : "",
+              available: fields.available ? fields.available.booleanValue : true
+            });
           });
-        });
-
+        }
         renderProducts();
-        renderCarousel();
         renderAdminProductsList();
-      });
-    } catch(e) { console.log(e); }
-
-    function renderCarousel() {
-      const carouselContainer = document.getElementById('carousel-items-container');
-      const activeProducts = allProducts.filter(p => p.available && p.img && p.img.length > 5);
-      
-      if (activeProducts.length === 0) {
-        carouselContainer.innerHTML = `
-          <div class="carousel-item active">
-            <div class="bg-danger text-white p-3 text-center rounded fw-bold">أهلاً بكم في متجر البراء للحوم والمصنعات ✨</div>
-          </div>`;
-        return;
+      } catch (err) {
+        console.error(err);
+        document.getElementById('products-grid').innerHTML = `<div class="col-12 text-center text-danger py-4">حدث خطأ في تحميل المنتجات، تأكد من اتصال الإنترنت.</div>`;
       }
-
-      carouselContainer.innerHTML = '';
-      activeProducts.forEach((p, index) => {
-        const item = document.createElement('div');
-        item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
-        item.innerHTML = `
-          <img src="${p.img}" class="d-block w-100" alt="${p.name}">
-          <div class="carousel-caption bg-dark bg-opacity-50 rounded-2 p-1">
-            <h6 class="m-0 text-white fw-bold">${p.name} - ${p.price} ج.م</h6>
-          </div>
-        `;
-        carouselContainer.appendChild(item);
-      });
     }
 
     function renderProducts() {
@@ -353,7 +227,7 @@
         col.innerHTML = `
           <div class="card-product p-2 h-100 d-flex flex-column justify-content-between shadow-sm">
             <div>
-              <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img rounded mb-2">
+              <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img rounded mb-2" onerror="this.src='https://via.placeholder.com/150'">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="badge ${p.available ? 'bg-success' : 'bg-danger'}">${p.available ? 'متوفر' : 'غير متوفر'}</span>
                 <small class="badge bg-light text-dark border">${p.category}</small>
@@ -362,36 +236,20 @@
               <small class="text-muted d-block">${p.weight}</small>
               <div class="text-danger fw-bold mt-1">${p.price} ج.م</div>
             </div>
-            <button class="add-cart-btn btn btn-sm ${p.available ? 'btn-danger fw-bold' : 'btn-secondary'} w-100 mt-2" ${!p.available ? 'disabled' : ''}>
+            <button class="btn btn-sm ${p.available ? 'btn-danger fw-bold' : 'btn-secondary'} w-100 mt-2" ${!p.available ? 'disabled' : ''} onclick="addToCart('${p.name}', ${p.price})">
               + إضافة للسلة
             </button>
           </div>`;
-
-        col.querySelector('.add-cart-btn').addEventListener('click', () => addToCart(p.name, p.price));
         grid.appendChild(col);
       });
     }
 
-    function renderAdminProductsList() {
-      const adminList = document.getElementById('admin-products-list');
-      adminList.innerHTML = '';
-      allProducts.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'list-group-item d-flex justify-content-between align-items-center';
-        item.innerHTML = `
-          <div>
-            <strong>${p.name}</strong> (${p.category}) 
-            - <span class="text-danger">${p.price} ج.م</span>
-          </div>
-          <div>
-            <button class="edit-btn btn btn-warning btn-sm me-1"><i class="fa-solid fa-pen"></i></button>
-            <button class="delete-btn btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
-          </div>`;
-
-        item.querySelector('.edit-btn').addEventListener('click', () => editProduct(p.id, p.name, p.price, p.weight, p.category, p.img, p.available));
-        item.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(p.id));
-        adminList.appendChild(item);
-      });
+    function filterCategory(catName, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      currentSelectedCategory = catName;
+      document.getElementById('category-title').innerText = catName === 'الكل' ? 'قائمة المنتجات' : `قسم ${catName}`;
+      renderProducts();
     }
 
     function addToCart(name, price) {
@@ -399,16 +257,14 @@
       if (existing) {
         existing.count += 1;
       } else {
-        cart.push({ name, price, count: 1 });
+        cart.push({ name, price: Number(price), count: 1 });
       }
       updateCartUI();
     }
 
     function changeQuantity(index, delta) {
       cart[index].count += delta;
-      if (cart[index].count <= 0) {
-        cart.splice(index, 1);
-      }
+      if (cart[index].count <= 0) cart.splice(index, 1);
       updateCartUI();
       renderCartModal();
     }
@@ -426,4 +282,162 @@
       const cartList = document.getElementById('cart-items-list');
       cartList.innerHTML = '';
 
-      if 
+      if (cart.length === 0) {
+        cartList.innerHTML = `<div class="text-center text-muted py-3">السلة فارغة حالياً.</div>`;
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'd-flex justify-content-between align-items-center mb-2 pb-2 border-bottom';
+        div.innerHTML = `
+          <div>
+            <h6 class="mb-0 fw-bold">${item.name}</h6>
+            <small class="text-muted">${item.price} ج.م x ${item.count} = ${item.price * item.count} ج.م</small>
+          </div>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-danger" onclick="changeQuantity(${index}, -1)">-</button>
+            <span class="btn btn-light disabled px-2 fw-bold text-dark">${item.count}</span>
+            <button class="btn btn-outline-success" onclick="changeQuantity(${index}, 1)">+</button>
+          </div>
+        `;
+        cartList.appendChild(div);
+      });
+    }
+
+    function openCartModal() {
+      renderCartModal();
+      cartModal.show();
+    }
+
+    function openAdminModal() {
+      adminModal.show();
+    }
+
+    function sendOrderToWhatsApp() {
+      if (cart.length === 0) return alert("السلة فارغة!");
+
+      const name = document.getElementById('cust-name').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+      const address = document.getElementById('cust-address').value.trim();
+
+      if (!name || !phone || !address) {
+        return alert("يرجى ملء جميع البيانات المطلوبة للحجز!");
+      }
+
+      let text = `🛒 *طلب جديد من الموقع الإلكتروني*\n\n`;
+      text += `👤 *الاسم:* ${name}\n`;
+      text += `📞 *الهاتف:* ${phone}\n`;
+      text += `📍 *العنوان:* ${address}\n`;
+      text += `------------------------------\n`;
+      text += `📦 *المنتجات:* \n`;
+
+      cart.forEach((item, index) => { 
+        text += `${index + 1}. ${item.name} (${item.count}) - ${item.price * item.count} ج.م\n`; 
+      });
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.count), 0);
+      text += `------------------------------\n`;
+      text += `💰 *الإجمالي النهائي:* ${total} ج.م`;
+
+      window.open(`https://wa.me/201004496451?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function loginAdmin() {
+      const inputPass = document.getElementById('admin-pass').value;
+      if (inputPass === adminPass) {
+        document.getElementById('admin-login-view').classList.add('d-none');
+        document.getElementById('admin-dashboard-view').classList.remove('d-none');
+      } else {
+        alert("كلمة السر خاطئة!");
+      }
+    }
+
+    function logoutAdmin() {
+      document.getElementById('admin-login-view').classList.remove('d-none');
+      document.getElementById('admin-dashboard-view').classList.add('d-none');
+      document.getElementById('admin-pass').value = '';
+    }
+
+    function renderAdminProductsList() {
+      const adminList = document.getElementById('admin-products-list');
+      adminList.innerHTML = '';
+      allProducts.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item d-flex justify-content-between align-items-center';
+        item.innerHTML = `
+          <div>
+            <strong>${p.name}</strong> (${p.category}) - <span class="text-danger">${p.price} ج.م</span>
+          </div>
+          <div>
+            <button class="btn btn-warning btn-sm me-1" onclick="editProduct('${p.id}', '${p.name}', ${p.price}, '${p.weight}', '${p.category}', '${p.img}', ${p.available})"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+        adminList.appendChild(item);
+      });
+    }
+
+    async function saveProduct() {
+      const id = document.getElementById('edit-doc-id').value;
+      const name = document.getElementById('p-name').value;
+      const price = Number(document.getElementById('p-price').value);
+      const weight = document.getElementById('p-weight').value;
+      const category = document.getElementById('p-category').value;
+      const available = document.getElementById('p-available').checked;
+      const img = document.getElementById('p-img-url').value;
+
+      if (!name || !price) return alert("يرجى كتابة الاسم والسعر!");
+
+      const payload = {
+        fields: {
+          name: { stringValue: name },
+          price: { integerValue: price },
+          weight: { stringValue: weight },
+          category: { stringValue: category },
+          available: { booleanValue: available },
+          img: { stringValue: img }
+        }
+      };
+
+      try {
+        if (id) {
+          await fetch(`${FIRESTORE_URL}/${id}?updateMask.fieldPaths=name&updateMask.fieldPaths=price&updateMask.fieldPaths=weight&updateMask.fieldPaths=category&updateMask.fieldPaths=available&updateMask.fieldPaths=img`, {
+            method: 'PATCH',
+            body: JSON.stringify(payload)
+          });
+        } else {
+          await fetch(FIRESTORE_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+        alert("تم الحفظ بنجاح!");
+        resetForm();
+        loadProducts();
+      } catch (e) {
+        alert("حدث خطأ أثناء الحفظ!");
+      }
+    }
+
+    function editProduct(id, name, price, weight, category, img, available) {
+      document.getElementById('edit-doc-id').value = id;
+      document.getElementById('p-name').value = name;
+      document.getElementById('p-price').value = price;
+      document.getElementById('p-weight').value = weight || '';
+      document.getElementById('p-category').value = category || 'لحوم';
+      document.getElementById('p-img-url').value = img || '';
+      document.getElementById('p-available').checked = available;
+      document.getElementById('form-title').innerText = "تعديل منتج";
+    }
+
+    async function deleteProduct(id) {
+      if (confirm("هل أنت تأكد من الحذف؟")) {
+        await fetch(`${FIRESTORE_URL}/${id}`, { method: 'DELETE' });
+        loadProducts();
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('edit-doc-id').value = '';
+      document.getElementById('p-name').value = '';
+     
