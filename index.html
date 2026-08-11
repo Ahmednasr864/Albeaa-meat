@@ -15,7 +15,6 @@
 </head>
 <body>
 
-    <!-- الهيدر واللوجو -->
     <header class="bg-white p-2 shadow-sm sticky-top mb-3">
         <div class="container d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
@@ -30,11 +29,9 @@
     </header>
 
     <div class="container">
-        <!-- لوحة التحكم الشاملة -->
         <div id="admin-panel" class="admin-box shadow">
             <h5 class="text-danger fw-bold border-bottom pb-2 mb-3">⚙️ لوحة التحكم المتكاملة</h5>
             
-            <!-- تسجيل الدخول للوحة التحكم -->
             <div id="admin-login-sec">
                 <p class="small text-muted">أدخل كلمة المرور (الافتراضية: 123):</p>
                 <div class="input-group mb-3">
@@ -43,17 +40,13 @@
                 </div>
             </div>
 
-            <!-- محتوى الإدارة بعد الدخول -->
             <div id="admin-body-sec" style="display:none;">
-                
-                <!-- تغيير اللوجو -->
                 <div class="card p-2 mb-3 bg-light border-0">
                     <h6 class="fw-bold text-dark">🖼️ تغيير لوجو المتجر</h6>
                     <input type="file" id="logo-file" class="form-control form-control-sm mb-2" accept="image/*">
                     <button class="btn btn-sm btn-dark" onclick="updateLogo()">تحديث اللوجو فوراً</button>
                 </div>
 
-                <!-- تغيير كلمة المرور -->
                 <div class="card p-2 mb-3 bg-light border-0">
                     <h6 class="fw-bold text-dark">🔑 تغيير كلمة مرور الإدارة</h6>
                     <div class="input-group input-group-sm mb-2">
@@ -62,7 +55,6 @@
                     </div>
                 </div>
 
-                <!-- إضافة / تعديل منتج -->
                 <div class="card p-2 mb-2 bg-light border-0">
                     <h6 class="fw-bold text-dark" id="form-title">➕ إضافة منتج جديد</h6>
                     <input type="hidden" id="edit-product-id">
@@ -74,11 +66,9 @@
                     <button class="btn btn-success btn-sm w-100 fw-bold" onclick="saveOrUpdateProduct()" id="save-btn">حفظ المنتج في السحابة</button>
                     <button class="btn btn-secondary btn-sm w-100 mt-1" onclick="resetForm()" id="cancel-btn" style="display:none;">إلغاء التعديل</button>
                 </div>
-
             </div>
         </div>
 
-        <!-- قائمة المنتجات -->
         <h5 class="fw-bold mb-3">قائمة المنتجات</h5>
         <div class="row g-3" id="products-grid">
             <div class="text-center py-5">
@@ -88,7 +78,6 @@
         </div>
     </div>
 
-    <!-- شريط السلة والطلب الثابت -->
     <div class="fixed-bottom bg-white shadow-lg p-3 border-top">
         <div class="container">
             <div class="row g-2 mb-2">
@@ -103,39 +92,35 @@
         </div>
     </div>
 
-    <!-- سكربت الفايربيس والمنطق البرمجي -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateData, doc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-        // ملاحظة: للتحديث نستخدم updateDoc
-        import { updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
         const db = getFirestore(initializeApp({ projectId: "baraa-meat" }));
         let products = [], cart = {};
+        let isAdminLoggedIn = false;
 
-        // فتح وإغلاق لوحة التحكم
         window.toggleAdmin = () => {
             let box = document.getElementById("admin-panel");
             box.style.display = (box.style.display === "block") ? "none" : "block";
         };
 
-        // التحقق من كلمة المرور
         window.checkAdminLogin = async () => {
             let passInput = document.getElementById("admin-pass-input").value;
-            // جلب الباسورد المخزن في قاعدة البيانات أو استخدام 123 كافتراضي
             let passDoc = await getDoc(doc(db, "settings", "password"));
             let savedPass = passDoc.exists() ? passDoc.data().value : "123";
 
             if(passInput === savedPass) {
+                isAdminLoggedIn = true;
                 document.getElementById("admin-login-sec").style.display = "none";
                 document.getElementById("admin-body-sec").style.display = "block";
+                renderGrid();
                 alert("تم تسجيل الدخول بنجاح!");
             } else {
                 alert("كلمة المرور غير صحيحة!");
             }
         };
 
-        // تغيير كلمة المرور
         window.changePassword = async () => {
             let newPass = document.getElementById("new-admin-pass").value;
             if(!newPass) { alert("أدخل كلمة المرور الجديدة!"); return; }
@@ -144,17 +129,16 @@
             document.getElementById("new-admin-pass").value = "";
         };
 
-        // تحديث اللوجو
         window.updateLogo = () => {
             const file = document.getElementById('logo-file').files[0];
             if(!file) { alert("اختر صورة للوجو!"); return; }
             compressImage(file, 150, 0.5, async (compressedUrl) => {
                 await setDoc(doc(db, "settings", "logo"), { value: compressedUrl });
+                document.getElementById("header-logo").src = compressedUrl;
                 alert("تم تحديث اللوجو بنجاح!");
             });
         };
 
-        // جلب الإعدادات (اللوجو) عند فتح الصفحة
         async function loadSettings() {
             let logoDoc = await getDoc(doc(db, "settings", "logo"));
             if(logoDoc.exists()) {
@@ -163,7 +147,6 @@
         }
         loadSettings();
 
-        // ضغط الصور تلقائياً (Canvas)
         function compressImage(file, maxWidth, quality, callback) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -182,7 +165,6 @@
             reader.readAsDataURL(file);
         }
 
-        // حفظ أو تحديث المنتج
         window.saveOrUpdateProduct = () => {
             let id = document.getElementById("edit-product-id").value;
             let name = document.getElementById("p-name").value;
@@ -203,7 +185,6 @@
                     resetForm();
                 });
             } else {
-                // لو لم يختار صورة جديدة أثناء التعديل
                 if(id) {
                     updateDoc(doc(db, "products", id), { name, price }).then(() => {
                         alert("تم التعديل بنجاح!");
@@ -215,7 +196,6 @@
             }
         };
 
-        // جلب المنتجات وتحديثها فوراً للجميع
         onSnapshot(collection(db, "products"), (snap) => {
             products = [];
             snap.forEach(d => products.push({id: d.id, ...d.data()}));
@@ -231,6 +211,7 @@
             let html = "";
             products.forEach(p => {
                 let q = cart[p.id] || 0;
+                let adminBtnsDisplay = isAdminLoggedIn ? "flex" : "none";
                 html += `
                 <div class="col-6 col-md-4">
                     <div class="card product-card h-100 p-2">
@@ -245,10 +226,9 @@
                                 <span class="fw-bold">${q}</span>
                                 <button class="btn btn-sm btn-outline-success px-2 py-0" onclick="updateCart('${p.id}', 1)">+</button>
                             </div>
-                            <!-- أزرار الإدارة الظاهرة للمنتج لو فاتح لوحة التحكم -->
-                            <div class="mt-2 pt-1 border-top d-flex gap-1" id="admin-btns-${p.id}" style="display:none;">
-                                <button class="btn btn-xs btn-primary w-50 py-0" style="font-size:11px;" onclick="prepEdit('${p.id}')">تعديل</button>
-                                <button class="btn btn-xs btn-danger w-50 py-0" style="font-size:11px;" onclick="delProd('${p.id}')">حذف</button>
+                            <div class="mt-2 pt-1 border-top gap-1" id="admin-btns-${p.id}" style="display:${adminBtnsDisplay};">
+                                <button class="btn btn-sm btn-primary w-50 py-0" style="font-size:11px;" onclick="prepEdit('${p.id}')">تعديل</button>
+                                <button class="btn btn-sm btn-danger w-50 py-0" style="font-size:11px;" onclick="delProd('${p.id}')">حذف</button>
                             </div>
                         </div>
                     </div>
@@ -269,7 +249,6 @@
             document.getElementById("total-price").innerText = total;
         }
 
-        // تجهيز بيانات المنتج للتعديل
         window.prepEdit = (id) => {
             let p = products.find(x => x.id === id);
             if(!p) return;
@@ -277,7 +256,7 @@
             document.getElementById("p-name").value = p.name;
             document.getElementById("p-price").value = p.price;
             document.getElementById("form-title").innerText = "✏️ تعديل المنتج";
-            document.getElementById("save-btn").innerText = التعديل الحفظ;
+            document.getElementById("save-btn").innerText = "حفظ التعديل";
             document.getElementById("cancel-btn").style.display = "block";
             window.scrollTo({top: 0, behavior: 'smooth'});
         };
@@ -321,5 +300,4 @@
         };
     </script>
 </body>
-            </html>
-        
+</html>
