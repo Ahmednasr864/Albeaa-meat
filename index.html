@@ -13,7 +13,7 @@
     .product-img { height: 130px; object-fit: cover; width: 100%; }
     .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
-    .carousel-item img { height: 200px; object-fit: cover; border-radius: 12px; }
+    .carousel-item img { height: 180px; object-fit: cover; border-radius: 12px; }
   </style>
 </head>
 <body>
@@ -37,14 +37,10 @@
     </div>
   </header>
 
-  <!-- شاشة العرض التلقائية (Slider/Carousel) -->
-  <div class="container mt-3">
+  <!-- شاشة عرض الصور الدوريه للمنتجات -->
+  <div class="container mt-3" id="carousel-section" style="display: none;">
     <div id="productCarousel" class="carousel slide shadow-sm rounded-3 overflow-hidden" data-bs-ride="carousel" data-bs-interval="2500">
-      <div class="carousel-inner" id="carousel-items-container">
-        <div class="carousel-item active">
-          <img src="https://via.placeholder.com/800x200?text=%D8%A3%D9%87%D9%84%D8%A7%D9%8B+%D8%A8%D9%83%D9%85+%D9%81%D9%8A+%D8%A7%D9%84%D8%A8%D8%B1%D8%A7%D8%A1" class="d-block w-100" alt="سلايدر">
-        </div>
-      </div>
+      <div class="carousel-inner" id="carousel-items-container"></div>
       <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon"></span>
       </button>
@@ -92,7 +88,6 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <!-- عناصر السلة -->
           <div id="cart-items-list" class="mb-3"></div>
 
           <div class="d-flex justify-content-between align-items-center fw-bold border-top pt-2 mb-3">
@@ -100,7 +95,6 @@
             <span id="cart-modal-total" class="text-danger h5 m-0">0 ج.م</span>
           </div>
 
-          <!-- بيانات العميل للحجز -->
           <div class="card p-3 bg-light border-0">
             <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-user me-1 text-danger"></i> بيانات الحجز والتوصيل:</h6>
             <input type="text" id="cust-name" class="form-control mb-2" placeholder="الاسم بالكامل *">
@@ -133,7 +127,6 @@
           </div>
           
           <div id="admin-dashboard-view" class="d-none">
-            <!-- قسم إعدادات المتجر العامة -->
             <div class="card p-3 mb-3 bg-white border-warning shadow-sm">
               <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-gear text-warning me-1"></i> إعدادات المحل والبروفايل:</h6>
               <div class="row g-2 mb-2">
@@ -163,7 +156,6 @@
 
             <hr>
 
-            <!-- قسم إضافة وتعديل المنتجات -->
             <div class="card p-3 mb-3 bg-light">
               <h6 class="fw-bold text-primary mb-2" id="form-title">إضافة منتج جديد</h6>
               <input type="hidden" id="edit-doc-id">
@@ -173,7 +165,6 @@
                 <div class="col"><input type="text" id="p-weight" placeholder="الوزن (مثلاً: 1 كجم)" class="form-control"></div>
               </div>
               
-              <!-- اختيار القسم -->
               <div class="mb-2">
                 <label class="small text-muted fw-bold">القسم:</label>
                 <select id="p-category" class="form-select">
@@ -210,7 +201,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBHzA4NFFr1R18a-zWJweXk3QgBJWnSkbM",
@@ -224,14 +215,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    let cart = []; // تحتوي الآن على عناصر بالهيكل: { name, price, count }
+    let cart = [];
     let allProducts = [];
     let currentSelectedCategory = "الكل";
 
-    const adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
-    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    let adminModal, cartModal;
 
-    // كلمة السر الافتراضية
+    document.addEventListener("DOMContentLoaded", () => {
+      adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
+      cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    });
+
     let currentAdminPass = localStorage.getItem('adminPass') || '123456';
 
     function compressImage(file) {
@@ -261,7 +255,7 @@
       });
     }
 
-    // جلب إعدادات المحل
+    // جلب الإعدادات
     onSnapshot(doc(db, "settings", "store_info"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -311,11 +305,14 @@
       document.getElementById('setting-new-pass').value = '';
     }
 
-    // جلب المنتجات وتحديث العرض والشاشة الدورية (Carousel)
+    // جلب كل المنتجات القديمة والجديدة
     onSnapshot(collection(db, "products"), (snapshot) => {
       allProducts = [];
       snapshot.forEach((docSnap) => {
-        allProducts.push({ id: docSnap.id, ...docSnap.data() });
+        const data = docSnap.data();
+        // التأكد من وجود قسم حتى للمنتجات القديمة
+        data.category = data.category || "لحوم";
+        allProducts.push({ id: docSnap.id, ...data });
       });
 
       renderProducts();
@@ -323,13 +320,17 @@
       renderAdminProductsList();
     });
 
-    // دالة عرض الشاشة المتروكة (Carousel)
     function renderCarousel() {
       const carouselContainer = document.getElementById('carousel-items-container');
-      const activeProducts = allProducts.filter(p => p.available && p.img);
+      const carouselSection = document.getElementById('carousel-section');
+      const activeProducts = allProducts.filter(p => p.available && p.img && p.img.trim() !== '');
       
-      if (activeProducts.length === 0) return;
+      if (activeProducts.length === 0) {
+        carouselSection.style.display = 'none';
+        return;
+      }
 
+      carouselSection.style.display = 'block';
       carouselContainer.innerHTML = '';
       activeProducts.forEach((p, index) => {
         const item = document.createElement('div');
@@ -344,14 +345,13 @@
       });
     }
 
-    // دالة عرض المنتجات حسب القسم المختار
     function renderProducts() {
       const grid = document.getElementById('products-grid');
       grid.innerHTML = '';
 
       const filtered = currentSelectedCategory === "الكل" 
         ? allProducts 
-        : allProducts.filter(p => p.category === currentSelectedCategory);
+        : allProducts.filter(p => (p.category || "لحوم") === currentSelectedCategory);
 
       if (filtered.length === 0) {
         grid.innerHTML = `<div class="col-12 text-center text-muted py-4">لا توجد منتجات حالياً في هذا القسم.</div>`;
@@ -383,7 +383,6 @@
       });
     }
 
-    // عرض قائمة المنتجات في لوحة الإدارة
     function renderAdminProductsList() {
       const adminList = document.getElementById('admin-products-list');
       adminList.innerHTML = '';
@@ -392,7 +391,7 @@
         item.className = 'list-group-item d-flex justify-content-between align-items-center';
         item.innerHTML = `
           <div>
-            <strong>${p.name}</strong> (${p.category || 'غير محدد'}) 
+            <strong>${p.name}</strong> (${p.category || 'لحوم'}) 
             - <span class="text-danger">${p.price} ج.م</span>
           </div>
           <div>
@@ -406,10 +405,18 @@
       });
     }
 
-    // تصفية الأقسام
     document.querySelectorAll('.filter-category-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-category-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         currentSelectedCategory = e.target.getAttribute('data-category');
-        document.getElementById('category-title').innerText = currentSelectedCategory === 'الكل'
+        document.getElementById('category-title').innerText = currentSelectedCategory === 'الكل' ? 'قائمة المنتجات' : `قسم ${currentSelectedCategory}`;
+        renderProducts();
+      });
+    });
+
+    function addToCart(name, price) {
+      const existing = cart.find(item => item.name === name);
+      if (existing) {
+        existing.count += 1;
+  
