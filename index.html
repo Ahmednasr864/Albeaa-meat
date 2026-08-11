@@ -3,40 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر البراء للحوم</title>
+    <title>البراء للحوم المجمدة والمصنعات</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #f8f9fa; padding-bottom: 140px; }
-        .product-card { border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); background: #fff; }
-        .admin-box { display: none; background: #fff; border: 2px solid #dc3545; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .store-logo { width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 2px solid #dc3545; }
+        body { background: #f4f6f9; padding-bottom: 150px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .product-card { border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; border: none; transition: 0.2s; }
+        .product-card:hover { transform: translateY(-3px); }
+        .admin-box { display: none; background: #fff; border: 2px solid #b30000; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+        .store-logo { width: 55px; height: 55px; object-fit: cover; border-radius: 50%; border: 2px solid #b30000; }
+        .banner { background: linear-gradient(135deg, #800000, #b30000); color: white; border-radius: 15px; padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(128,0,0,0.2); }
+        .btn-custom-red { background-color: #b30000; color: white; }
+        .btn-custom-red:hover { background-color: #800000; color: white; }
     </style>
 </head>
 <body>
 
+    <!-- الهيدر -->
     <header class="bg-white p-2 shadow-sm sticky-top mb-3">
         <div class="container d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
                 <img id="header-logo" src="https://via.placeholder.com/60?text=Logo" class="store-logo">
                 <div>
-                    <h5 class="m-0 fw-bold text-danger">متجر البراء للحوم</h5>
-                    <small class="text-muted" style="font-size: 11px;">أجود اللحوم الطازجة والمجمدة</small>
+                    <h6 class="m-0 fw-bold text-danger">البراء للمصنعات</h6>
+                    <small class="text-muted" style="font-size: 10px;">لحوم طازجة ومجمدة</small>
                 </div>
             </div>
-            <button class="btn btn-sm btn-outline-danger" onclick="toggleAdmin()"><i class="fa-solid fa-gear"></i> الإدارة</button>
+            <div class="d-flex gap-1">
+                <a href="tel:01016462078" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-phone"></i></a>
+                <button class="btn btn-sm btn-custom-red" onclick="toggleAdmin()"><i class="fa-solid fa-gear"></i></button>
+            </div>
         </div>
     </header>
 
     <div class="container">
+        <!-- بانر الترحيب -->
+        <div class="banner">
+            <h4 class="fw-bold mb-1">🥩 البراء للحوم المجمدة والمصنعات</h4>
+            <p class="mb-2 small" style="opacity: 0.9;">أهلاً بكم يا فندم! نود خدمتكم دائماً بأجود وأطعم المنتجات.</p>
+            <div class="d-flex justify-content-center gap-2 mt-2 flex-wrap">
+                <a href="https://wa.me/201004496451" target="_blank" class="btn btn-light btn-sm text-success fw-bold"><i class="fa-brands fa-whatsapp"></i> واتساب 1</a>
+                <a href="https://wa.me/201500449107" target="_blank" class="btn btn-light btn-sm text-success fw-bold"><i class="fa-brands fa-whatsapp"></i> واتساب 2</a>
+            </div>
+        </div>
+
+        <!-- لوحة التحكم -->
         <div id="admin-panel" class="admin-box shadow">
-            <h5 class="text-danger fw-bold border-bottom pb-2 mb-3">⚙️ لوحة التحكم المتكاملة</h5>
+            <h5 class="text-danger fw-bold border-bottom pb-2 mb-3">⚙️ لوحة الإدارة الشاملة</h5>
             
             <div id="admin-login-sec">
                 <p class="small text-muted">أدخل كلمة المرور (الافتراضية: 123):</p>
                 <div class="input-group mb-3">
                     <input type="password" id="admin-pass-input" class="form-control" placeholder="كلمة المرور">
-                    <button class="btn btn-danger" onclick="checkAdminLogin()">دخول</button>
+                    <button class="btn btn-custom-red" onclick="checkAdminLogin()">دخول</button>
                 </div>
             </div>
 
@@ -58,9 +77,12 @@
                 <div class="card p-2 mb-2 bg-light border-0">
                     <h6 class="fw-bold text-dark" id="form-title">➕ إضافة منتج جديد</h6>
                     <input type="hidden" id="edit-product-id">
-                    <input type="text" id="p-name" class="form-control form-control-sm mb-2" placeholder="اسم المنتج">
-                    <input type="number" id="p-price" class="form-control form-control-sm mb-2" placeholder="السعر (ج.م)">
-                    <label class="small text-muted mb-1">صورة المنتج (اختر صورة ليتم ضغطها تلقائياً):</label>
+                    <input type="text" id="p-name" class="form-control form-control-sm mb-2" placeholder="اسم المنتج (مثلاً: بفتيك مجمد)">
+                    <div class="row g-2 mb-2">
+                        <div class="col-6"><input type="number" id="p-price" class="form-control form-control-sm" placeholder="السعر (ج.م)"></div>
+                        <div class="col-6"><input type="text" id="p-weight" class="form-control form-control-sm" placeholder="الوزن/العبوة (مثلاً: كيلو)"></div>
+                    </div>
+                    <label class="small text-muted mb-1">صورة المنتج:</label>
                     <input type="file" id="p-img-file" class="form-control form-control-sm mb-2" accept="image/*">
                     
                     <button class="btn btn-success btn-sm w-100 fw-bold" onclick="saveOrUpdateProduct()" id="save-btn">حفظ المنتج في السحابة</button>
@@ -69,7 +91,7 @@
             </div>
         </div>
 
-        <h5 class="fw-bold mb-3">قائمة المنتجات</h5>
+        <h5 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-basket-shopping me-1"></i> أصناف اللحوم والمصنعات</h5>
         <div class="row g-3" id="products-grid">
             <div class="text-center py-5">
                 <div class="spinner-border text-danger" role="status"></div>
@@ -78,6 +100,7 @@
         </div>
     </div>
 
+    <!-- شريط السلة والحجز الثابت -->
     <div class="fixed-bottom bg-white shadow-lg p-3 border-top">
         <div class="container">
             <div class="row g-2 mb-2">
@@ -87,7 +110,7 @@
             </div>
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="text-danger m-0 fw-bold">الإجمالي: <span id="total-price">0</span> ج.م</h5>
-                <button class="btn btn-success fw-bold px-4" onclick="sendOrder()"><i class="fa-brands fa-whatsapp me-1"></i> إرسال الطلب</button>
+                <button class="btn btn-success fw-bold px-4" onclick="sendOrder()"><i class="fa-brands fa-whatsapp me-1"></i> إتمام وحجز الطلب</button>
             </div>
         </div>
     </div>
@@ -169,6 +192,7 @@
             let id = document.getElementById("edit-product-id").value;
             let name = document.getElementById("p-name").value;
             let price = Number(document.getElementById("p-price").value);
+            let weight = document.getElementById("p-weight").value || '';
             let file = document.getElementById('p-img-file').files[0];
 
             if(!name || !price) { alert("أدخل اسم المنتج والسعر!"); return; }
@@ -176,17 +200,17 @@
             if(file) {
                 compressImage(file, 400, 0.6, async (imgUrl) => {
                     if(id) {
-                        await updateDoc(doc(db, "products", id), { name, price, image: imgUrl });
+                        await updateDoc(doc(db, "products", id), { name, price, weight, image: imgUrl });
                         alert("تم تعديل المنتج بنجاح!");
                     } else {
-                        await addDoc(collection(db, "products"), { name, price, image: imgUrl });
+                        await addDoc(collection(db, "products"), { name, price, weight, image: imgUrl });
                         alert("تمت الإضافة بنجاح!");
                     }
                     resetForm();
                 });
             } else {
                 if(id) {
-                    updateDoc(doc(db, "products", id), { name, price }).then(() => {
+                    updateDoc(doc(db, "products", id), { name, price, weight }).then(() => {
                         alert("تم التعديل بنجاح!");
                         resetForm();
                     });
@@ -215,20 +239,23 @@
                 html += `
                 <div class="col-6 col-md-4">
                     <div class="card product-card h-100 p-2">
-                        <img src="${p.image || 'https://via.placeholder.com/150'}" class="card-img-top rounded" height="120" style="object-fit:cover;">
+                        <img src="${p.image || 'https://via.placeholder.com/150'}" class="card-img-top rounded" height="110" style="object-fit:cover;">
                         <div class="card-body p-1 d-flex flex-column justify-content-between">
                             <div>
-                                <h6 class="fw-bold mb-1" style="font-size:14px;">${p.name}</h6>
-                                <span class="text-danger fw-bold">${p.price} ج.م</span>
+                                <h6 class="fw-bold mb-1 text-dark" style="font-size:13px;">${p.name}</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-danger fw-bold" style="font-size:13px;">${p.price} ج.م</span>
+                                    <span class="badge bg-light text-dark border" style="font-size:10px;">${p.weight || ''}</span>
+                                </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-2 bg-light rounded p-1">
                                 <button class="btn btn-sm btn-outline-danger px-2 py-0" onclick="updateCart('${p.id}', -1)">-</button>
-                                <span class="fw-bold">${q}</span>
+                                <span class="fw-bold small">${q}</span>
                                 <button class="btn btn-sm btn-outline-success px-2 py-0" onclick="updateCart('${p.id}', 1)">+</button>
                             </div>
                             <div class="mt-2 pt-1 border-top gap-1" id="admin-btns-${p.id}" style="display:${adminBtnsDisplay};">
-                                <button class="btn btn-sm btn-primary w-50 py-0" style="font-size:11px;" onclick="prepEdit('${p.id}')">تعديل</button>
-                                <button class="btn btn-sm btn-danger w-50 py-0" style="font-size:11px;" onclick="delProd('${p.id}')">حذف</button>
+                                <button class="btn btn-sm btn-primary w-50 py-0" style="font-size:10px;" onclick="prepEdit('${p.id}')">تعديل</button>
+                                <button class="btn btn-sm btn-danger w-50 py-0" style="font-size:10px;" onclick="delProd('${p.id}')">حذف</button>
                             </div>
                         </div>
                     </div>
@@ -255,6 +282,7 @@
             document.getElementById("edit-product-id").value = p.id;
             document.getElementById("p-name").value = p.name;
             document.getElementById("p-price").value = p.price;
+            document.getElementById("p-weight").value = p.weight || '';
             document.getElementById("form-title").innerText = "✏️ تعديل المنتج";
             document.getElementById("save-btn").innerText = "حفظ التعديل";
             document.getElementById("cancel-btn").style.display = "block";
@@ -265,6 +293,7 @@
             document.getElementById("edit-product-id").value = "";
             document.getElementById("p-name").value = "";
             document.getElementById("p-price").value = "";
+            document.getElementById("p-weight").value = "";
             document.getElementById("p-img-file").value = "";
             document.getElementById("form-title").innerText = "➕ إضافة منتج جديد";
             document.getElementById("save-btn").innerText = "حفظ المنتج في السحابة";
@@ -285,13 +314,13 @@
 
             if(!name || !phone) { alert("الرجاء كتابة الاسم ورقم الموبايل!"); return; }
 
-            let msg = `🛒 *طلب جديد من متجر البراء:*%0A%0A👤 الاسم: ${name}%0A📞 الموبايل: ${phone}%0A📍 العنوان: ${addr}%0A%0A📦 *الطلبات:*%0A`;
+            let msg = `🥩 *حجز جديد من البراء للمصنعات:*%0A%0A👤 الاسم: ${name}%0A📞 الموبايل: ${phone}%0A📍 العنوان: ${addr}%0A%0A📦 *الأصناف المحجوزة:*%0A`;
             let total = 0;
             products.forEach(p => {
                 if(cart[p.id] > 0) {
                     let sub = p.price * cart[p.id];
                     total += sub;
-                    msg += `• ${p.name} (×${cart[p.id]}) = ${sub} ج.م%0A`;
+                    msg += `• ${p.name} (${p.weight || ''}) ×${cart[p.id]} = ${sub} ج.م%0A`;
                 }
             });
             if(total === 0) { alert("السلة فارغة!"); return; }
@@ -300,4 +329,5 @@
         };
     </script>
 </body>
-</html>
+                </html>
+                
