@@ -13,6 +13,7 @@
     .product-img { height: 130px; object-fit: cover; width: 100%; }
     .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
+    .carousel-item img { height: 200px; object-fit: cover; border-radius: 12px; }
   </style>
 </head>
 <body>
@@ -36,13 +37,39 @@
     </div>
   </header>
 
-  <!-- عرض المنتجات -->
+  <!-- شاشة العرض التلقائية (Slider/Carousel) -->
   <div class="container mt-3">
-    <h5 class="fw-bold border-start border-4 border-danger ps-2 mb-3">قائمة المنتجات</h5>
+    <div id="productCarousel" class="carousel slide shadow-sm rounded-3 overflow-hidden" data-bs-ride="carousel" data-bs-interval="2500">
+      <div class="carousel-inner" id="carousel-items-container">
+        <div class="carousel-item active">
+          <img src="https://via.placeholder.com/800x200?text=%D8%A3%D9%87%D9%84%D8%A7%D9%8B+%D8%A8%D9%83%D9%85+%D9%81%D9%8A+%D8%A7%D9%84%D8%A8%D8%B1%D8%A7%D8%A1" class="d-block w-100" alt="سلايدر">
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- عرض الأقسام والمنتجات -->
+  <div class="container mt-3">
+    <!-- أزرار الأقسام -->
+    <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="category-buttons">
+      <button class="btn btn-outline-danger active rounded-pill text-nowrap filter-category-btn" data-category="الكل">الكل 🛒</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="لحوم">لحوم 🥩</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="مصنعات لحوم">مصنعات لحوم 🍔</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="مصنعات فراخ">مصنعات فراخ 🍗</button>
+      <button class="btn btn-outline-danger rounded-pill text-nowrap filter-category-btn" data-category="أطباق مشكل">أطباق مشكل 🍲</button>
+    </div>
+
+    <h5 class="fw-bold border-start border-4 border-danger ps-2 mb-3" id="category-title">قائمة المنتجات</h5>
     <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2"></div>
   </div>
 
-  <!-- السلة -->
+  <!-- السلة السفلية -->
   <div class="cart-bar shadow-lg">
     <div class="container d-flex justify-content-between align-items-center">
       <div>
@@ -50,9 +77,44 @@
         <span id="cart-total" class="h5 fw-bold text-danger m-0">0 ج.م</span>
         <span id="cart-count" class="badge bg-danger rounded-pill ms-1">(0 صنف)</span>
       </div>
-      <button id="send-whatsapp-btn" class="btn btn-success fw-bold">
-        <i class="fa-brands fa-whatsapp me-1"></i> إرسال الطلب
+      <button class="btn btn-success fw-bold" id="open-cart-modal-btn">
+        <i class="fa-solid fa-cart-shopping me-1"></i> استكمال الطلب
       </button>
+    </div>
+  </div>
+
+  <!-- نافذة تفاصيل السلة وبيانات العميل -->
+  <div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-shopping-cart me-2"></i> سلة المشتريات</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- عناصر السلة -->
+          <div id="cart-items-list" class="mb-3"></div>
+
+          <div class="d-flex justify-content-between align-items-center fw-bold border-top pt-2 mb-3">
+            <span>الإجمالي:</span>
+            <span id="cart-modal-total" class="text-danger h5 m-0">0 ج.م</span>
+          </div>
+
+          <!-- بيانات العميل للحجز -->
+          <div class="card p-3 bg-light border-0">
+            <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-user me-1 text-danger"></i> بيانات الحجز والتوصيل:</h6>
+            <input type="text" id="cust-name" class="form-control mb-2" placeholder="الاسم بالكامل *">
+            <input type="tel" id="cust-phone" class="form-control mb-2" placeholder="رقم الموبايل *">
+            <input type="text" id="cust-address" class="form-control mb-1" placeholder="العنوان بالتفصيل *">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+          <button type="button" id="send-whatsapp-btn" class="btn btn-success fw-bold">
+            <i class="fa-brands fa-whatsapp me-1"></i> تأكيد وإرسال للواتساب
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -71,7 +133,6 @@
           </div>
           
           <div id="admin-dashboard-view" class="d-none">
-            
             <!-- قسم إعدادات المتجر العامة -->
             <div class="card p-3 mb-3 bg-white border-warning shadow-sm">
               <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-gear text-warning me-1"></i> إعدادات المحل والبروفايل:</h6>
@@ -111,6 +172,18 @@
                 <div class="col"><input type="number" id="p-price" placeholder="السعر" class="form-control"></div>
                 <div class="col"><input type="text" id="p-weight" placeholder="الوزن (مثلاً: 1 كجم)" class="form-control"></div>
               </div>
+              
+              <!-- اختيار القسم -->
+              <div class="mb-2">
+                <label class="small text-muted fw-bold">القسم:</label>
+                <select id="p-category" class="form-select">
+                  <option value="لحوم">لحوم 🥩</option>
+                  <option value="مصنعات لحوم">مصنعات لحوم 🍔</option>
+                  <option value="مصنعات فراخ">مصنعات فراخ 🍗</option>
+                  <option value="أطباق مشكل">أطباق مشكل 🍲</option>
+                </select>
+              </div>
+
               <input type="text" id="p-img-url" placeholder="رابط صورة أونلاين (اختياري)" class="form-control mb-2">
               <div class="mb-2">
                 <label class="small text-muted fw-bold">أو اختر صورة من جهازك:</label>
@@ -150,8 +223,13 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let cart = [];
+    
+    let cart = []; // تحتوي الآن على عناصر بالهيكل: { name, price, count }
+    let allProducts = [];
+    let currentSelectedCategory = "الكل";
+
     const adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
+    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
 
     // كلمة السر الافتراضية
     let currentAdminPass = localStorage.getItem('adminPass') || '123456';
@@ -183,7 +261,7 @@
       });
     }
 
-    // جلب وحفظ إعدادات البروفايل (الاسم، الوصف، اللوجو، كلمة السر) من وإلى Firebase
+    // جلب إعدادات المحل
     onSnapshot(doc(db, "settings", "store_info"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -233,24 +311,64 @@
       document.getElementById('setting-new-pass').value = '';
     }
 
-    // عرض المنتجات
+    // جلب المنتجات وتحديث العرض والشاشة الدورية (Carousel)
     onSnapshot(collection(db, "products"), (snapshot) => {
-      const grid = document.getElementById('products-grid');
-      const adminList = document.getElementById('admin-products-list');
-      grid.innerHTML = '';
-      adminList.innerHTML = '';
-
+      allProducts = [];
       snapshot.forEach((docSnap) => {
-        const p = docSnap.data();
-        const id = docSnap.id;
+        allProducts.push({ id: docSnap.id, ...docSnap.data() });
+      });
 
+      renderProducts();
+      renderCarousel();
+      renderAdminProductsList();
+    });
+
+    // دالة عرض الشاشة المتروكة (Carousel)
+    function renderCarousel() {
+      const carouselContainer = document.getElementById('carousel-items-container');
+      const activeProducts = allProducts.filter(p => p.available && p.img);
+      
+      if (activeProducts.length === 0) return;
+
+      carouselContainer.innerHTML = '';
+      activeProducts.forEach((p, index) => {
+        const item = document.createElement('div');
+        item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+        item.innerHTML = `
+          <img src="${p.img}" class="d-block w-100" alt="${p.name}">
+          <div class="carousel-caption bg-dark bg-opacity-50 rounded-2 p-1">
+            <h6 class="m-0 text-white fw-bold">${p.name} - ${p.price} ج.م</h6>
+          </div>
+        `;
+        carouselContainer.appendChild(item);
+      });
+    }
+
+    // دالة عرض المنتجات حسب القسم المختار
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = '';
+
+      const filtered = currentSelectedCategory === "الكل" 
+        ? allProducts 
+        : allProducts.filter(p => p.category === currentSelectedCategory);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-12 text-center text-muted py-4">لا توجد منتجات حالياً في هذا القسم.</div>`;
+        return;
+      }
+
+      filtered.forEach((p) => {
         const col = document.createElement('div');
         col.className = 'col';
         col.innerHTML = `
           <div class="card-product p-2 h-100 d-flex flex-column justify-content-between shadow-sm">
             <div>
               <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img rounded mb-2">
-              <span class="badge ${p.available ? 'bg-success' : 'bg-danger'} mb-1">${p.available ? 'متوفر' : 'غير متوفر'}</span>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="badge ${p.available ? 'bg-success' : 'bg-danger'}">${p.available ? 'متوفر' : 'غير متوفر'}</span>
+                <small class="badge bg-light text-dark border">${p.category || 'لحوم'}</small>
+              </div>
               <h6 class="fw-bold mb-1">${p.name}</h6>
               <small class="text-muted d-block">${p.weight || ''}</small>
               <div class="text-danger fw-bold mt-1">${p.price} ج.م</div>
@@ -262,111 +380,36 @@
 
         col.querySelector('.add-cart-btn').addEventListener('click', () => addToCart(p.name, p.price));
         grid.appendChild(col);
+      });
+    }
 
+    // عرض قائمة المنتجات في لوحة الإدارة
+    function renderAdminProductsList() {
+      const adminList = document.getElementById('admin-products-list');
+      adminList.innerHTML = '';
+      allProducts.forEach(p => {
         const item = document.createElement('div');
         item.className = 'list-group-item d-flex justify-content-between align-items-center';
         item.innerHTML = `
-          <div><strong>${p.name}</strong> - <span class="text-danger">${p.price} ج.م</span></div>
+          <div>
+            <strong>${p.name}</strong> (${p.category || 'غير محدد'}) 
+            - <span class="text-danger">${p.price} ج.م</span>
+          </div>
           <div>
             <button class="edit-btn btn btn-warning btn-sm me-1"><i class="fa-solid fa-pen"></i></button>
             <button class="delete-btn btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
           </div>`;
 
-        item.querySelector('.edit-btn').addEventListener('click', () => editProduct(id, p.name, p.price, p.weight, p.img, p.available));
-        item.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(id));
+        item.querySelector('.edit-btn').addEventListener('click', () => editProduct(p.id, p.name, p.price, p.weight, p.category, p.img, p.available));
+        item.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(p.id));
         adminList.appendChild(item);
       });
-    });
-
-    async function saveProduct() {
-      const id = document.getElementById('edit-doc-id').value;
-      const name = document.getElementById('p-name').value;
-      const price = Number(document.getElementById('p-price').value);
-      const weight = document.getElementById('p-weight').value;
-      const available = document.getElementById('p-available').checked;
-      let img = document.getElementById('p-img-url').value;
-      const fileInput = document.getElementById('p-img-file');
-
-      if (!name || !price) return alert("يرجى كتابة الاسم والسعر!");
-
-      if (fileInput.files[0]) {
-        img = await compressImage(fileInput.files[0]);
-      }
-
-      if (id) {
-        await updateDoc(doc(db, "products", id), { name, price, weight, available, img });
-      } else {
-        await addDoc(collection(db, "products"), { name, price, weight, available, img });
-      }
-
-      alert("تم الحفظ بنجاح!");
-      resetForm();
     }
 
-    function editProduct(id, name, price, weight, img, available) {
-      document.getElementById('edit-doc-id').value = id;
-      document.getElementById('p-name').value = name;
-      document.getElementById('p-price').value = price;
-      document.getElementById('p-weight').value = weight || '';
-      document.getElementById('p-img-url').value = img || '';
-      document.getElementById('p-available').checked = available;
-      document.getElementById('form-title').innerText = "تعديل منتج";
-      document.getElementById('save-product-btn').innerText = "تحديث البيانات";
-    }
-
-    async function deleteProduct(id) {
-      if (confirm("هل أنت تأكد من الحذف؟")) await deleteDoc(doc(db, "products", id));
-    }
-
-    function resetForm() {
-      document.getElementById('edit-doc-id').value = '';
-      document.getElementById('p-name').value = '';
-      document.getElementById('p-price').value = '';
-      document.getElementById('p-weight').value = '';
-      document.getElementById('p-img-url').value = '';
-      document.getElementById('p-img-file').value = '';
-      document.getElementById('form-title').innerText = "إضافة منتج جديد";
-      document.getElementById('save-product-btn').innerText = "حفظ المنتج بسرعة 🚀";
-    }
-
-    function addToCart(name, price) {
-      cart.push({ name, price });
-      const total = cart.reduce((sum, item) => sum + item.price, 0);
-      document.getElementById('cart-total').innerText = total + ' ج.م';
-      document.getElementById('cart-count').innerText = `(${cart.length} صنف)`;
-    }
-
-    function sendOrderToWhatsApp() {
-      if (cart.length === 0) return alert("السلة فارغة!");
-      let text = "طلب جديد من الموقع الإلكتروني:\n\n";
-      cart.forEach((item, index) => { text += `${index + 1}. ${item.name} - ${item.price} ج.م\n`; });
-      const total = cart.reduce((sum, item) => sum + item.price, 0);
-      text += `\nالإجمالي: ${total} ج.م`;
-      window.open(`https://wa.me/201004496451?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    // ربط الأحداث والأزرار
-    document.getElementById('open-admin-btn').addEventListener('click', () => adminModal.show());
-    document.getElementById('save-product-btn').addEventListener('click', saveProduct);
-    document.getElementById('reset-form-btn').addEventListener('click', resetForm);
-    document.getElementById('send-whatsapp-btn').addEventListener('click', sendOrderToWhatsApp);
-    document.getElementById('save-settings-btn').addEventListener('click', saveStoreSettings);
-
-    document.getElementById('login-admin-btn').addEventListener('click', () => {
-      const inputPass = document.getElementById('admin-pass').value;
-      if (inputPass === currentAdminPass) {
-        document.getElementById('admin-login-view').classList.add('d-none');
-        document.getElementById('admin-dashboard-view').classList.remove('d-none');
-      } else {
-        alert("كلمة السر خاطئة!");
-      }
-    });
-
-    document.getElementById('logout-admin-btn').addEventListener('click', () => {
-      document.getElementById('admin-login-view').classList.remove('d-none');
-      document.getElementById('admin-dashboard-view').classList.add('d-none');
-      document.getElementById('admin-pass').value = '';
-    });
-  </script>
-</body>
-</html>
+    // تصفية الأقسام
+    document.querySelectorAll('.filter-category-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-category-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentSelectedCategory = e.target.getAttribute('data-category');
+        document.getElementById('category-title').innerText = currentSelectedCategory === 'الكل'
