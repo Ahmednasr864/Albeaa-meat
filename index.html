@@ -8,18 +8,18 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { background-color: #f8f9fa; font-family: sans-serif; padding-bottom: 90px; }
-    .header-bg { background-color: #8b0000; color: white; }
+    .header-bg { background-color: #8b0000; color: white; transition: background 0.3s; }
     .card-product { border-radius: 12px; border: 1px solid #e0e0e0; background: #fff; overflow: hidden; }
     .product-img { height: 130px; object-fit: cover; width: 100%; }
     .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
-    .banner-box { background: linear-gradient(135deg, #8b0000, #d9534f); color: white; border-radius: 12px; padding: 15px; text-align: center; }
+    .banner-box { background: linear-gradient(135deg, #8b0000, #d9534f); color: white; border-radius: 12px; padding: 15px; text-align: center; background-size: cover; background-position: center; }
   </style>
 </head>
 <body>
 
   <!-- الهيدر -->
-  <header class="header-bg p-3 shadow-sm sticky-top">
+  <header class="header-bg p-3 shadow-sm sticky-top" id="main-header">
     <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
       <div class="d-flex align-items-center gap-2">
         <img id="store-logo" src="https://via.placeholder.com/100?text=Logo" class="logo-img">
@@ -39,8 +39,8 @@
 
   <!-- بنر الترحيب والعروض -->
   <div class="container mt-3">
-    <div class="banner-box shadow-sm">
-      <h6 class="m-0 fw-bold">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
+    <div class="banner-box shadow-sm" id="banner-box">
+      <h6 class="m-0 fw-bold" id="banner-text">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
     </div>
   </div>
 
@@ -122,37 +122,83 @@
           </div>
           
           <div id="admin-dashboard-view" class="d-none">
-            <div class="card p-3 mb-3 bg-light">
-              <h6 class="fw-bold text-primary mb-2" id="form-title">إضافة منتج جديد</h6>
-              <input type="hidden" id="edit-doc-id">
-              <input type="text" id="p-name" placeholder="اسم المنتج" class="form-control mb-2">
-              <div class="row g-2 mb-2">
-                <div class="col"><input type="number" id="p-price" placeholder="السعر" class="form-control"></div>
-                <div class="col"><input type="text" id="p-weight" placeholder="الوزن (مثلاً: 1 كجم)" class="form-control"></div>
-              </div>
-              
-              <div class="mb-2">
-                <label class="small text-muted fw-bold">القسم:</label>
-                <select id="p-category" class="form-select">
-                  <option value="لحوم">لحوم 🥩</option>
-                  <option value="مصنعات لحوم">مصنعات لحوم 🍔</option>
-                  <option value="مصنعات فراخ">مصنعات فراخ 🍗</option>
-                  <option value="أطباق مشكل">أطباق مشكل 🍲</option>
-                </select>
+            <!-- التبويبات بالداخل -->
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item">
+                <button class="nav-link active" id="pills-products-tab" data-bs-toggle="pill" data-bs-target="#pills-products">إدارة الأصناف 📦</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings">إعدادات المحل والغلاف ⚙️</button>
+              </li>
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+              <!-- تبويب المنتجات -->
+              <div class="tab-pane fade show active" id="pills-products">
+                <div class="card p-3 mb-3 bg-light">
+                  <h6 class="fw-bold text-primary mb-2" id="form-title">إضافة منتج جديد</h6>
+                  <input type="hidden" id="edit-doc-id">
+                  <input type="text" id="p-name" placeholder="اسم المنتج" class="form-control mb-2">
+                  <div class="row g-2 mb-2">
+                    <div class="col"><input type="number" id="p-price" placeholder="السعر" class="form-control"></div>
+                    <div class="col"><input type="text" id="p-weight" placeholder="الوزن (مثلاً: 1 كجم)" class="form-control"></div>
+                  </div>
+                  
+                  <div class="mb-2">
+                    <label class="small text-muted fw-bold">القسم:</label>
+                    <select id="p-category" class="form-select">
+                      <option value="لحوم">لحوم 🥩</option>
+                      <option value="مصنعات لحوم">مصنعات لحوم 🍔</option>
+                      <option value="مصنعات فراخ">مصنعات فراخ 🍗</option>
+                      <option value="أطباق مشكل">أطباق مشكل 🍲</option>
+                    </select>
+                  </div>
+
+                  <!-- رفع صورة وضغطها -->
+                  <div class="mb-2">
+                    <label class="small fw-bold text-danger">رفع صورة المنتج (يتم الضغط تلقائياً) 📸:</label>
+                    <input type="file" id="p-img-file" class="form-control mb-1" accept="image/*" onchange="compressAndSetImage(this, 'p-img-url')">
+                    <input type="text" id="p-img-url" placeholder="أو مسار/رابط صورة أونلاين" class="form-control">
+                  </div>
+
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="p-available" checked>
+                    <label class="form-check-label">متوفر للبيع 🟢</label>
+                  </div>
+                  <button onclick="saveProduct()" class="btn btn-success w-100 fw-bold mb-2">حفظ المنتج بسرعة 🚀</button>
+                  <button onclick="resetForm()" class="btn btn-outline-secondary w-100 btn-sm">إلغاء التعديل</button>
+                </div>
+
+                <h6 class="fw-bold">إدارة المنتجات (تعديل / حذف):</h6>
+                <div id="admin-products-list" class="list-group mb-3"></div>
               </div>
 
-              <input type="text" id="p-img-url" placeholder="رابط صورة أونلاين" class="form-control mb-2">
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="p-available" checked>
-                <label class="form-check-label">متوفر للبيع 🟢</label>
+              <!-- تبويب الأمان والإعدادات -->
+              <div class="tab-pane fade" id="pills-settings">
+                <!-- تغيير كلمة المرور -->
+                <div class="card p-3 mb-3 bg-light">
+                  <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-key me-1"></i> تغيير كلمة مرور الإدارة</h6>
+                  <input type="password" id="new-admin-pass" class="form-control mb-2" placeholder="كلمة المرور الجديدة">
+                  <button onclick="changePassword()" class="btn btn-primary btn-sm fw-bold">حفظ كلمة المرور الجديدة</button>
+                </div>
+
+                <!-- تغيير صورة الغلاف والشعار -->
+                <div class="card p-3 mb-3 bg-light">
+                  <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-image me-1"></i> تغيير صورة الغلاف واللوجو</h6>
+                  <label class="small fw-bold">صورة الغلاف (Banner):</label>
+                  <input type="file" id="cover-file" class="form-control mb-2" accept="image/*" onchange="compressAndSetImage(this, 'cover-url-val')">
+                  <input type="hidden" id="cover-url-val">
+
+                  <label class="small fw-bold">صورة اللوجو (Logo):</label>
+                  <input type="file" id="logo-file" class="form-control mb-2" accept="image/*" onchange="compressAndSetImage(this, 'logo-url-val')">
+                  <input type="hidden" id="logo-url-val">
+
+                  <button onclick="saveStoreBranding()" class="btn btn-success btn-sm fw-bold">حفظ الغلاف واللوجو</button>
+                </div>
               </div>
-              <button onclick="saveProduct()" class="btn btn-success w-100 fw-bold mb-2">حفظ المنتج بسرعة 🚀</button>
-              <button onclick="resetForm()" class="btn btn-outline-secondary w-100 btn-sm">إلغاء التعديل</button>
             </div>
 
-            <h6 class="fw-bold">إدارة المنتجات (تعديل / حذف):</h6>
-            <div id="admin-products-list" class="list-group mb-3"></div>
-            <button onclick="logoutAdmin()" class="btn btn-secondary btn-sm w-100">تسجيل خروج</button>
+            <button onclick="logoutAdmin()" class="btn btn-secondary btn-sm w-100 mt-2">تسجيل خروج</button>
           </div>
         </div>
       </div>
@@ -168,16 +214,66 @@
     let cart = [];
     let allProducts = [];
     let currentSelectedCategory = "الكل";
-    let adminPass = "123456";
+    let adminPass = localStorage.getItem("albaraa_admin_pass") || "123456";
 
     let adminModal, cartModal;
 
     document.addEventListener("DOMContentLoaded", () => {
       adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
       cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+      loadBranding();
       loadProducts();
     });
 
+    // تحميل إعدادات الشعار والغلاف الحالية
+    function loadBranding() {
+      const savedLogo = localStorage.getItem("albaraa_logo");
+      const savedCover = localStorage.getItem("albaraa_cover");
+
+      if (savedLogo) document.getElementById('store-logo').src = savedLogo;
+      if (savedCover) {
+        document.getElementById('banner-box').style.backgroundImage = `url('${savedCover}')`;
+      }
+    }
+
+    // ضغط الصور أوتوماتيكياً قبل حفظها أو رفعها
+    function compressAndSetImage(input, targetInputId) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 600; // أقصى بعد لتوفير الحجم الضخم
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // الضغط بنسبة 70% للسرعة وحصافة المساحة
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          document.getElementById(targetInputId).value = compressedDataUrl;
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // جلب المنتجات بشكل مباشر ومضمون 100%
     async function loadProducts() {
       try {
         const res = await fetch(FIRESTORE_URL);
@@ -322,130 +418,4 @@
       const address = document.getElementById('cust-address').value.trim();
 
       if (!name || !phone || !address) {
-        return alert("يرجى ملء جميع البيانات المطلوبة للحجز!");
-      }
-
-      let text = `🛒 *طلب جديد من الموقع الإلكتروني*\n\n`;
-      text += `👤 *الاسم:* ${name}\n`;
-      text += `📞 *الهاتف:* ${phone}\n`;
-      text += `📍 *العنوان:* ${address}\n`;
-      text += `------------------------------\n`;
-      text += `📦 *المنتجات:* \n`;
-
-      cart.forEach((item, index) => { 
-        text += `${index + 1}. ${item.name} (${item.count}) - ${item.price * item.count} ج.م\n`; 
-      });
-
-      const total = cart.reduce((sum, item) => sum + (item.price * item.count), 0);
-      text += `------------------------------\n`;
-      text += `💰 *الإجمالي النهائي:* ${total} ج.م`;
-
-      window.open(`https://wa.me/201004496451?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    function loginAdmin() {
-      const inputPass = document.getElementById('admin-pass').value;
-      if (inputPass === adminPass) {
-        document.getElementById('admin-login-view').classList.add('d-none');
-        document.getElementById('admin-dashboard-view').classList.remove('d-none');
-      } else {
-        alert("كلمة السر خاطئة!");
-      }
-    }
-
-    function logoutAdmin() {
-      document.getElementById('admin-login-view').classList.remove('d-none');
-      document.getElementById('admin-dashboard-view').classList.add('d-none');
-      document.getElementById('admin-pass').value = '';
-    }
-
-    function renderAdminProductsList() {
-      const adminList = document.getElementById('admin-products-list');
-      adminList.innerHTML = '';
-      allProducts.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'list-group-item d-flex justify-content-between align-items-center';
-        item.innerHTML = `
-          <div>
-            <strong>${p.name}</strong> (${p.category}) - <span class="text-danger">${p.price} ج.م</span>
-          </div>
-          <div>
-            <button class="btn btn-warning btn-sm me-1" onclick="editProduct('${p.id}', '${p.name}', ${p.price}, '${p.weight}', '${p.category}', '${p.img}', ${p.available})"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
-          </div>`;
-        adminList.appendChild(item);
-      });
-    }
-
-    async function saveProduct() {
-      const id = document.getElementById('edit-doc-id').value;
-      const name = document.getElementById('p-name').value;
-      const price = Number(document.getElementById('p-price').value);
-      const weight = document.getElementById('p-weight').value;
-      const category = document.getElementById('p-category').value;
-      const available = document.getElementById('p-available').checked;
-      const img = document.getElementById('p-img-url').value;
-
-      if (!name || !price) return alert("يرجى كتابة الاسم والسعر!");
-
-      const payload = {
-        fields: {
-          name: { stringValue: name },
-          price: { integerValue: price },
-          weight: { stringValue: weight },
-          category: { stringValue: category },
-          available: { booleanValue: available },
-          img: { stringValue: img }
-        }
-      };
-
-      try {
-        if (id) {
-          await fetch(`${FIRESTORE_URL}/${id}?updateMask.fieldPaths=name&updateMask.fieldPaths=price&updateMask.fieldPaths=weight&updateMask.fieldPaths=category&updateMask.fieldPaths=available&updateMask.fieldPaths=img`, {
-            method: 'PATCH',
-            body: JSON.stringify(payload)
-          });
-        } else {
-          await fetch(FIRESTORE_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-        }
-        alert("تم الحفظ بنجاح!");
-        resetForm();
-        loadProducts();
-      } catch (e) {
-        alert("حدث خطأ أثناء الحفظ!");
-      }
-    }
-
-    function editProduct(id, name, price, weight, category, img, available) {
-      document.getElementById('edit-doc-id').value = id;
-      document.getElementById('p-name').value = name;
-      document.getElementById('p-price').value = price;
-      document.getElementById('p-weight').value = weight || '';
-      document.getElementById('p-category').value = category || 'لحوم';
-      document.getElementById('p-img-url').value = img || '';
-      document.getElementById('p-available').checked = available;
-      document.getElementById('form-title').innerText = "تعديل منتج";
-    }
-
-    async function deleteProduct(id) {
-      if (confirm("هل أنت تأكد من الحذف؟")) {
-        await fetch(`${FIRESTORE_URL}/${id}`, { method: 'DELETE' });
-        loadProducts();
-      }
-    }
-
-    function resetForm() {
-      document.getElementById('edit-doc-id').value = '';
-      document.getElementById('p-name').value = '';
-      document.getElementById('p-price').value = '';
-      document.getElementById('p-weight').value = '';
-      document.getElementById('p-category').value = 'لحوم';
-      document.getElementById('p-img-url').value = '';
-      document.getElementById('form-title').innerText = "إضافة منتج جديد";
-    }
-  </script>
-</body>
-</html>
+        return alert("يرجى ملء جميع البيانات الم
