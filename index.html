@@ -3,166 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">البراء للحوم المجمدة والمصنعات</title>
+    <title>البراء للحوم المجمدة والمصنعات</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 90px; }
+        body { background-color: #f8f9fa; padding-bottom: 90px; }
         .header-bg { background-color: #8b0000; color: white; }
-        .card-product { border-radius: 12px; border: none; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card-product { border-radius: 12px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .product-img { height: 130px; object-fit: cover; border-radius: 12px 12px 0 0; }
-        .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #fff; }
         .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: 0 -3px 10px rgba(0,0,0,0.1); z-index: 1000; padding: 12px; }
-        .banner-container { margin-top: 10px; margin-bottom: 15px; }
-        .carousel-item img { height: 180px; object-fit: cover; border-radius: 12px; width: 100%; }
-        .badge-cat { cursor: pointer; border-radius: 20px; padding: 8px 16px; font-weight: normal; white-space: nowrap; }
-        .badge-cat.active { background-color: #8b0000 !important; color: white !important; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- الهيدر واللوجو -->
     <header class="header-bg p-3 shadow-sm sticky-top">
-        <div class="container d-flex flex-column gap-2">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <img id="store-logo" src="https://via.placeholder.com/45?text=Logo" class="logo-img" alt="لوجو المتجر">
-                    <div>
-                        <h6 class="m-0 fw-bold" id="store-title">البراء للحوم المجمدة والمصنعات</h6>
-                        <small class="text-white-50" style="font-size: 11px;">أعلى جودة وأفضل سعر</small>
-                    </div>
-                </div>
-                <div class="d-flex gap-1">
-                    <a href="tel:01016462078" class="btn btn-sm btn-warning text-dark"><i class="fa-solid fa-phone"></i></a>
-                    <a href="https://wa.me/201016462078" target="_blank" class="btn btn-sm btn-success"><i class="fa-brands fa-whatsapp"></i> 1</a>
-                    <a href="https://wa.me/201202888631" target="_blank" class="btn btn-sm btn-success"><i class="fa-brands fa-whatsapp"></i> 2</a>
-                    <button class="btn btn-sm btn-dark" onclick="openAdminModal()"><i class="fa-solid fa-lock"></i> الإدارة</button>
-                </div>
+        <div class="container d-flex align-items-center justify-content-between">
+            <div>
+                <h6 class="m-0 fw-bold">البراء للحوم المجمدة والمصنعات</h6>
+                <small class="text-white-50" style="font-size: 11px;">أعلى جودة وأفضل سعر</small>
+            </div>
+            <div class="d-flex gap-1">
+                <a href="https://wa.me/201016462078" class="btn btn-sm btn-success"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+                <button class="btn btn-sm btn-light text-dark fw-bold" onclick="toggleAdminPanel()"><i class="fa-solid fa-lock"></i> الإدارة</button>
             </div>
         </div>
     </header>
 
-    <div class="container">
-        <!-- البانر المتحرك لصور العروض والأصناف تحت اللوجو مباشرة -->
-        <div class="banner-container">
-            <div id="heroCarousel" class="carousel slide shadow-sm rounded" data-bs-ride="carousel" data-bs-interval="3000">
-                <div class="carousel-inner" id="carousel-items">
-                    <div class="carousel-item active">
-                        <img src="https://via.placeholder.com/800x300/8b0000/ffffff?text=%D8%B9%D8%B1%D9%88%D8%B6+%D9%88%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA+%D8%A7%D9%84%D8%A8%D8%B1%D8%A7%D8%A1" class="d-block w-100" alt="عرض">
-                    </div>
+    <div class="container my-3">
+        <!-- لوحة الإدارة السريعة (مخفية وتظهر عند الضغط) -->
+        <div id="admin-box" class="card card-body bg-light border-danger mb-4 shadow" style="display: none;">
+            <h5 class="fw-bold text-danger border-bottom pb-2">لوحة التحكم والإدارة</h5>
+            <div id="admin-auth">
+                <p>أدخل كلمة المرور لدخول اللوحة:</p>
+                <div class="input-group mb-3">
+                    <input type="password" id="pass-input" class="form-control" placeholder="كلمة المرور">
+                    <button class="btn btn-danger" onclick="checkPass()">دخول</button>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
+            </div>
+            <div id="admin-content" style="display: none;">
+                <h6 class="fw-bold mb-3">إضافة منتج جديد:</h6>
+                <div class="row g-2">
+                    <div class="col-6"><input type="text" id="p-name" class="form-control" placeholder="اسم المنتج"></div>
+                    <div class="col-6"><input type="number" id="p-price" class="form-control" placeholder="السعر"></div>
+                    <div class="col-6"><input type="text" id="p-cat" class="form-control" placeholder="القسم (مثال: لحوم)"></div>
+                    <div class="col-6"><input type="text" id="p-unit" class="form-control" placeholder="الوحدة" value="1كجم"></div>
+                    <div class="col-12"><input type="text" id="p-img" class="form-control" placeholder="رابط الصورة"></div>
+                </div>
+                <button class="btn btn-success mt-3 w-100 fw-bold" onclick="addNewProduct()">حفظ المنتج ونشره</button>
             </div>
         </div>
 
-        <!-- أزرار الأقسام -->
-        <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="categories-list">
-            <span class="badge bg-white text-dark border badge-cat active" onclick="filterCategory('all', this)">الكل</span>
-        </div>
-
-        <!-- شبكة عرض المنتجات -->
+        <!-- قائمة المنتجات -->
         <h5 class="fw-bold mb-3 border-end border-4 border-danger pe-2">قائمة المنتجات</h5>
         <div class="row g-3" id="products-grid">
-            <div class="text-center py-5">
-                <div class="spinner-border text-danger" role="status"></div>
-                <p class="mt-2 text-muted">جاري تحميل المنتجات والبيانات...</p>
-            </div>
+            <div class="text-center py-4 text-muted">اضغط على زرار الإدارة بالأعلى لتبدأ بإضافة أول منتج، أو انتظر جاري التحميل...</div>
         </div>
     </div>
 
-    <!-- شريط سلة المشتريات السفلي -->
     <div class="cart-bar">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <small class="text-muted d-block">إجمالي حسابك:</small>
+                <small class="text-muted d-block">إجمالي الحساب:</small>
                 <span class="fw-bold text-danger fs-5" id="cart-total">0 ج.م</span>
-                <span class="badge bg-secondary ms-1" id="cart-count">0 صنف</span>
             </div>
-            <button class="btn btn-success fw-bold px-4" onclick="checkout()"><i class="fa-solid fa-cart-shopping me-1"></i> استكمال الطلب</button>
+            <button class="btn btn-success fw-bold px-4" onclick="checkout()"><i class="fa-solid fa-cart-shopping me-1"></i> إرسال الطلب</button>
         </div>
     </div>
 
-    <!-- مودال لوحة التحكم للإدارة -->
-    <div class="modal fade" id="adminModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title"><i class="fa-solid fa-user-shield me-2"></i> لوحة التحكم والإدارة</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="admin-body">
-                    <!-- نموذج تسجل الدخول -->
-                    <div id="admin-login-form">
-                        <div class="mb-3">
-                            <label class="form-label">كلمة المرور:</label>
-                            <input type="password" id="admin-pass-input" class="form-control" placeholder="أدخل كلمة المرور">
-                        </div>
-                        <button class="btn btn-primary w-100" onclick="loginAdmin()">دخول</button>
-                    </div>
-
-                    <!-- محتوى الأدمن -->
-                    <div id="admin-panel" style="display: none;">
-                        <ul class="nav nav-tabs mb-3" id="adminTabs">
-                            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-products">إدارة الأصناف</a></li>
-                            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-offers">صور البانر العرض</a></li>
-                            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-settings">الباسورد واللوجو</a></li>
-                        </ul>
-
-                        <div class="tab-content">
-                            <!-- إدارة المنتجات -->
-                            <div class="tab-pane fade show active" id="tab-products">
-                                <form id="product-form" onsubmit="saveProduct(event)">
-                                    <input type="hidden" id="prod-id">
-                                    <div class="row g-2">
-                                        <div class="col-6"><input type="text" id="prod-name" class="form-control" placeholder="اسم المنتج" required></div>
-                                        <div class="col-6"><input type="number" id="prod-price" class="form-control" placeholder="السعر" required></div>
-                                        <div class="col-6"><input type="text" id="prod-cat" class="form-control" placeholder="القسم (لحوم/مصنعات فراخ/أطباق...)" required></div>
-                                        <div class="col-6"><input type="text" id="prod-unit" class="form-control" placeholder="الوحدة (كجم/طبق/علبة)" value="1كجم"></div>
-                                        <div class="col-12"><input type="text" id="prod-img" class="form-control" placeholder="رابط صورة المنتج" required></div>
-                                    </div>
-                                    <button type="submit" class="btn btn-success mt-2 w-100">حفظ المنتج</button>
-                                </form>
-                                <hr>
-                                <div id="admin-products-list" class="list-group"></div>
-                            </div>
-
-                            <!-- إدارة البانر -->
-                            <div class="tab-pane fade" id="tab-offers">
-                                <div class="mb-3">
-                                    <input type="text" id="offer-img-input" class="form-control mb-2" placeholder="رابط صورة العرض للبانر">
-                                    <button class="btn btn-success w-100" onclick="addOffer()">إضافة صورة للبانر</button>
-                                </div>
-                                <div id="admin-offers-list" class="list-group"></div>
-                            </div>
-
-                            <!-- الإعدادات والباسورد -->
-                            <div class="tab-pane fade" id="tab-settings">
-                                <h6>تغيير كلمة المرور</h6>
-                                <input type="password" id="new-pass-input" class="form-control mb-2" placeholder="كلمة المرور الجديدة">
-                                <button class="btn btn-warning w-100 mb-3" onclick="changeAdminPassword()">تحديث كلمة المرور</button>
-                                <hr>
-                                <h6>تغيير اللوجو واسم المتجر</h6>
-                                <input type="text" id="setting-title-input" class="form-control mb-2" placeholder="اسم المتجر">
-                                <input type="text" id="setting-logo-input" class="form-control mb-2" placeholder="رابط اللوجو">
-                                <button class="btn btn-primary w-100" onclick="saveStoreSettings()">حفظ البيانات</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JS Scripts & Firebase Config -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBHzA4NFfr1R18a-zWJweXk3QgBjWnSkbM",
@@ -176,198 +86,80 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let products = [];
-        let categories = [];
-        let cart = {};
-        let adminPassword = "123";
-        let offers = [];
+        let cartTotal = 0;
 
-        async function loadData() {
-            try {
-                const settingsSnap = await getDoc(doc(db, "settings", "general"));
-                if (settingsSnap.exists()) {
-                    const data = settingsSnap.data();
-                    if (data.password) adminPassword = data.password;
-                    if (data.title) {
-                        document.getElementById("store-title").innerText = data.title;
-                        document.getElementById("page-title").innerText = data.title;
-                    }
-                    if (data.logo) document.getElementById("store-logo").src = data.logo;
-                }
-
-                const querySnapshot = await getDocs(collection(db, "products"));
-                products = [];
-                categories = [];
-                querySnapshot.forEach((doc) => {
-                    let prod = { id: doc.id, ...doc.data() };
-                    products.push(prod);
-                    if (prod.category && !categories.includes(prod.category)) {
-                        categories.push(prod.category);
-                    }
-                });
-
-                const offersSnap = await getDocs(collection(db, "offers"));
-                offers = [];
-                offersSnap.forEach(doc => offers.push({ id: doc.id, ...doc.data() }));
-
-                renderCategories();
-                renderProducts(products);
-                renderOffers();
-                renderAdminProducts();
-                renderAdminOffers();
-            } catch (error) {
-                console.error("خطأ:", error);
-                document.getElementById("products-grid").innerHTML = `<div class="alert alert-danger text-center">خطأ في استدعاء البيانات: ${error.message}</div>`;
-            }
+        window.toggleAdminPanel = function() {
+            const box = document.getElementById("admin-box");
+            box.style.display = box.style.display === "none" ? "block" : "none";
         }
 
-        function renderCategories() {
-            const catList = document.getElementById("categories-list");
-            catList.innerHTML = `<span class="badge bg-white text-dark border badge-cat active" onclick="window.filterCategory('all', this)">الكل</span>`;
-            categories.forEach(cat => {
-                catList.innerHTML += `<span class="badge bg-white text-dark border badge-cat" onclick="window.filterCategory('${cat}', this)">${cat}</span>`;
-            });
-        }
-
-        window.filterCategory = function(cat, element) {
-            document.querySelectorAll(".badge-cat").forEach(el => el.classList.remove("active"));
-            element.classList.add("active");
-            if (cat === 'all') {
-                renderProducts(products);
+        window.checkPass = function() {
+            const pass = document.getElementById("pass-input").value;
+            if (pass === "123") {
+                document.getElementById("admin-auth").style.display = "none";
+                document.getElementById("admin-content").style.display = "block";
             } else {
-                renderProducts(products.filter(p => p.category === cat));
+                alert("كلمة المرور خطأ!");
             }
         }
 
-        function renderProducts(list) {
-            const grid = document.getElementById("products-grid");
-            if (list.length === 0) {
-                grid.innerHTML = `<div class="text-center py-4 text-muted">لا توجد منتجات مسجلة حتى الآن</div>`;
+        window.addNewProduct = async function() {
+            const name = document.getElementById("p-name").value;
+            const price = Number(document.getElementById("p-price").value);
+            const category = document.getElementById("p-cat").value;
+            const unit = document.getElementById("p-unit").value;
+            const image = document.getElementById("p-img").value || 'https://via.placeholder.com/150';
+
+            if (!name || !price) {
+                alert("يرجى إدخال اسم المنتج والسعر على الأقل!");
                 return;
             }
-            grid.innerHTML = "";
-            list.forEach(p => {
-                const qty = cart[p.id] ? cart[p.id].qty : 0;
-                grid.innerHTML += `
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <div class="card card-product h-100">
-                            <img src="${p.image || 'https://via.placeholder.com/150'}" class="product-img" alt="${p.name}">
-                            <div class="card-body p-2 d-flex flex-column justify-content-between">
-                                <div>
-                                    <h6 class="fw-bold mb-1" style="font-size: 14px;">${p.name}</h6>
-                                    <small class="text-muted d-block mb-2" style="font-size: 11px;">لكل ${p.unit || 'كجم'}</small>
-                                </div>
-                                <div>
+
+            await addDoc(collection(db, "products"), { name, price, category, unit, image });
+            alert("تم إضافة المنتج بنجاح!");
+            location.reload();
+        }
+
+        async function loadProducts() {
+            const grid = document.getElementById("products-grid");
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                if (querySnapshot.empty) {
+                    grid.innerHTML = `<div class="text-center py-4 text-muted">لا توجد منتجات مسجلة، افتح لوحة الإدارة وأضف منتجك الأول!</div>`;
+                    return;
+                }
+                grid.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    let p = doc.data();
+                    grid.innerHTML += `
+                        <div class="col-6 col-md-4">
+                            <div class="card card-product h-100">
+                                <img src="${p.image}" class="product-img">
+                                <div class="card-body p-2">
+                                    <h6 class="fw-bold mb-1">${p.name}</h6>
                                     <div class="fw-bold text-danger mb-2">${p.price} ج.م</div>
-                                    <div class="d-flex align-items-center justify-content-between bg-light rounded p-1">
-                                        <button class="btn btn-sm btn-danger px-2" onclick="window.updateCart('${p.id}', -1)">-</button>
-                                        <span class="fw-bold" id="qty-${p.id}">${qty}</span>
-                                        <button class="btn btn-sm btn-success px-2" onclick="window.updateCart('${p.id}', 1)">+</button>
-                                    </div>
+                                    <button class="btn btn-sm btn-success w-100" onclick="window.addCart(${p.price})">+ إضافة للسلة</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
-        }
-
-        function renderOffers() {
-            const container = document.getElementById("carousel-items");
-            if (offers.length === 0) return;
-            container.innerHTML = "";
-            offers.forEach((off, idx) => {
-                container.innerHTML += `
-                    <div class="carousel-item ${idx === 0 ? 'active' : ''}">
-                        <img src="${off.image}" class="d-block w-100" alt="عرض البانر">
-                    </div>
-                `;
-            });
-        }
-
-        window.updateCart = function(id, change) {
-            const p = products.find(prod => prod.id === id);
-            if (!p) return;
-            if (!cart[id]) cart[id] = { product: p, qty: 0 };
-            cart[id].qty += change;
-            if (cart[id].qty <= 0) delete cart[id];
-            
-            document.getElementById(`qty-${id}`).innerText = cart[id] ? cart[id].qty : 0;
-            calculateCart();
-        }
-
-        function calculateCart() {
-            let total = 0;
-            let count = 0;
-            for (let id in cart) {
-                total += cart[id].product.price * cart[id].qty;
-                count += cart[id].qty;
+                    `;
+                });
+            } catch (e) {
+                grid.innerHTML = `<div class="alert alert-danger">خطأ في التحميل: ${e.message}</div>`;
             }
-            document.getElementById("cart-total").innerText = `${total} ج.م`;
-            document.getElementById("cart-count").innerText = `${count} صنف`;
+        }
+
+        window.addCart = function(price) {
+            cartTotal += price;
+            document.getElementById("cart-total").innerText = `${cartTotal} ج.م`;
         }
 
         window.checkout = function() {
-            let keys = Object.keys(cart);
-            if (keys.length === 0) {
-                alert("السلة فارغة! برجاء إضافات منتجات للطلب.");
-                return;
-            }
-            let text = "🛒 *طلب جديد من متجر البراء:*%0A%0A";
-            let total = 0;
-            keys.forEach(k => {
-                let item = cart[k];
-                let itemTotal = item.product.price * item.qty;
-                total += itemTotal;
-                text += `• ${item.product.name} (${item.qty} ${item.product.unit || 'كجم'}) = ${itemTotal} ج.م%0A`;
-            });
-            text += `%0A💰 *الإجمالي الكلي:* ${total} ج.م`;
-            window.open(`https://wa.me/201016462078?text=${text}`, '_blank');
+            if (cartTotal === 0) { alert("السلة فارغة!"); return; }
+            window.open(`https://wa.me/201016462078?text=أريد طلب منتجات بإجمالي: ${cartTotal} ج.م`, '_blank');
         }
 
-        window.openAdminModal = function() {
-            let modal = new bootstrap.Modal(document.getElementById('adminModal'));
-            modal.show();
-        }
-
-        window.loginAdmin = function() {
-            let pass = document.getElementById("admin-pass-input").value;
-            if (pass === adminPassword) {
-                document.getElementById("admin-login-form").style.display = "none";
-                document.getElementById("admin-panel").style.display = "block";
-            } else {
-                alert("كلمة المرور غير صحيحة!");
-            }
-        }
-
-        window.saveProduct = async function(e) {
-            e.preventDefault();
-            let id = document.getElementById("prod-id").value;
-            let data = {
-                name: document.getElementById("prod-name").value,
-                price: Number(document.getElementById("prod-price").value),
-                category: document.getElementById("prod-cat").value,
-                unit: document.getElementById("prod-unit").value,
-                image: document.getElementById("prod-img").value
-            };
-            if (id) {
-                await updateDoc(doc(db, "products", id), data);
-            } else {
-                await addDoc(collection(db, "products"), data);
-            }
-            document.getElementById("product-form").reset();
-            document.getElementById("prod-id").value = "";
-            loadData();
-        }
-
-        function renderAdminProducts() {
-            const list = document.getElementById("admin-products-list");
-            list.innerHTML = "";
-            products.forEach(p => {
-                list.innerHTML += `
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${p.name}</strong> - ${p.price} ج.م (${p.category})
-                        </div>
-                        <div>
-          
+        loadProducts();
+    </script>
+</body>
+</html>
