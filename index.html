@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">البراء للحوم المجمدة والمصنعات</title>
+  <title>البراء للحوم المجمدة والمصنعات</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -195,10 +195,21 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- مكتبات Firebase الرسمية المستقرة -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <script>
-    const PROJECT_ID = "albaraameat-a6163";
-    const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/products`;
-    const SETTINGS_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/settings/store`;
+    // إعدادات مشروع الفايربيس الخاص بك
+    const firebaseConfig = {
+      projectId: "albaraameat-a6163"
+    };
+
+    // تهيئة الفايربيس
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
 
     let cart = [];
     let allProducts = [];
@@ -211,86 +222,70 @@
       adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
       cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
       
-      // تحميل الأصناف فوراً ودون انتظار أي شيء آخر
       loadProducts();
-      
-      // تحميل اللوجو والغلاف بشكل هادئ وسريع
       loadStoreSettings();
     });
 
-    async function loadProducts() {
-      try {
-        const res = await fetch(FIRESTORE_URL);
-        const data = await res.json();
+    // جلب المنتجات باستخدام مكتبة SDK الرسمية
+    function loadProducts() {
+      db.collection("products").get().then((querySnapshot) => {
         allProducts = [];
-
-        if (data.documents) {
-          data.documents.forEach(docItem => {
-            const fields = docItem.fields || {};
-            const docId = docItem.name.split('/').pop();
-
-            allProducts.push({
-              id: docId,
-              name: fields.name ? fields.name.stringValue : "منتج بدون اسم",
-              price: fields.price ? (fields.price.integerValue || fields.price.doubleValue || fields.price.stringValue) : 0,
-              weight: fields.weight ? fields.weight.stringValue : "",
-              category: fields.category ? fields.category.stringValue : "لحوم",
-              img: fields.img ? fields.img.stringValue : "",
-              available: fields.available ? fields.available.booleanValue : true
-            });
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          allProducts.push({
+            id: doc.id,
+            name: data.name || "منتج بدون اسم",
+            price: Number(data.price) || 0,
+            weight: data.weight || "",
+            category: data.category || "لحوم",
+            img: data.img || "",
+            available: data.available !== undefined ? data.available : true
           });
-        }
+        });
         renderProducts();
         renderAdminProductsList();
-      } catch (err) {
-        console.error(err);
-        document.getElementById('products-grid').innerHTML = `<div class="col-12 text-center text-danger py-4">حدث خطأ في تحميل المنتجات، تأكد من اتصال الإنترنت.</div>`;
-      }
+      }).catch((error) => {
+        console.error("خطأ في جلب المنتجات: ", error);
+        document.getElementById('products-grid').innerHTML = `<div class="col-12 text-center text-danger py-4">حدث خطأ أثناء تحميل المنتجات.</div>`;
+      });
     }
 
-    async function loadStoreSettings() {
-      try {
-        const res = await fetch(SETTINGS_URL);
-        if (res.ok) {
-          const data = await res.json();
-          const fields = data.fields || {};
-          if (fields.logo && fields.logo.stringValue) {
-            document.getElementById('store-logo').src = fields.logo.stringValue;
-            document.getElementById('settings-logo-url').value = fields.logo.stringValue;
+    // جلب إعدادات اللوجو والغلاف
+    function loadStoreSettings() {
+      db.collection("settings").doc("store").get().then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.logo) {
+            document.getElementById('store-logo').src = data.logo;
+            document.getElementById('settings-logo-url').value = data.logo;
           }
-          if (fields.cover && fields.cover.stringValue) {
-            document.getElementById('banner-box').style.backgroundImage = `url('${fields.cover.stringValue}')`;
-            document.getElementById('settings-cover-url').value = fields.cover.stringValue;
+          if (data.cover) {
+            document.getElementById('banner-box').style.backgroundImage = `url('${data.cover}')`;
+            document.getElementById('settings-cover-url').value = data.cover;
           }
         }
-      } catch (e) {
-        console.log("استخدام اللوجو والغلاف الافتراضي");
-      }
+      }).catch((e) => {
+        console.log("استخدام الإعدادات الافتراضية");
+      });
     }
 
-    async function saveStoreSettings() {
+    // حفظ اللوجو والغلاف سحابياً
+    function saveStoreSettings() {
       const logoUrl = document.getElementById('settings-logo-url').value;
       const coverUrl = document.getElementById('settings-cover-url').value;
 
-      const payload = {
-        fields: {
-          logo: { stringValue: logoUrl },
-          cover: { stringValue: coverUrl }
-        }
-      };
-
-      try {
-        await fetch(SETTINGS_URL, {
-          method: 'PATCH',
-          body: JSON.stringify(payload)
-        });
-        alert("تم حفظ اللوجو والغلاف سحابياً بنجاح!");
+      db.collection("settings").doc("store").set({
+        logo: logoUrl,
+        cover: coverUrl
+      }, { merge: true }).then(() => {
+        alert("تم حفظ اللوجو والغلاف سحابياً بنجاح وسوف يظهران للجميع!");
         loadStoreSettings();
-      } catch (e) {
-        alert("حدث خطأ أثناء الحفظ السحابي!");
-      }
+      }).catch(() => {
+        alert("حدث خطأ أثناء الحفظ!");
+      });
     }
 
+    // ضغط الصور
     function compressLogo(input) {
       const file = input.files[0];
       if(!file) return;
@@ -322,6 +317,24 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, 600, 200);
           document.getElementById('settings-cover-url').value = canvas.toDataURL('image/jpeg', 0.6);
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+
+    function uploadCompressedImage(input) {
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 300; canvas.height = 300;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 300, 300);
+          document.getElementById('p-img-url').value = canvas.toDataURL('image/jpeg', 0.5);
         }
       }
       reader.readAsDataURL(file);
@@ -418,15 +431,4 @@
             <button class="btn btn-outline-danger" onclick="changeQuantity(${index}, -1)">-</button>
             <span class="btn btn-light disabled px-2 fw-bold text-dark">${item.count}</span>
             <button class="btn btn-outline-success" onclick="changeQuantity(${index}, 1)">+</button>
-          </div>
-        `;
-        cartList.appendChild(div);
-      });
-    }
-
-    function openCartModal() {
-      renderCartModal();
-      cartModal.show();
-    }
-
-    function openA
+        
