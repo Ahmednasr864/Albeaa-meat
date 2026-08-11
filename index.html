@@ -13,7 +13,7 @@
     .product-img { height: 130px; object-fit: cover; width: 100%; }
     .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; background-color: #fff; }
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
-    .banner-box { background: linear-gradient(135deg, #8b0000, #d9534f); color: white; border-radius: 12px; padding: 15px; text-align: center; background-size: cover; background-position: center; transition: all 0.3s ease; }
+    .banner-box { background: linear-gradient(135deg, #8b0000, #d9534f); color: white; border-radius: 12px; padding: 15px; text-align: center; background-size: cover; background-position: center; }
   </style>
 </head>
 <body>
@@ -40,7 +40,7 @@
   <!-- بنر الترحيب والعروض -->
   <div class="container mt-3">
     <div class="banner-box shadow-sm" id="banner-box">
-      <h6 class="m-0 fw-bold" id="banner-text">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
+      <h6 class="m-0 fw-bold">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
     </div>
   </div>
 
@@ -123,22 +123,22 @@
           
           <div id="admin-dashboard-view" class="d-none">
 
-            <!-- قسم إعدادات المتجر السحابية (اللوجو والغلاف) -->
+            <!-- قسم إعدادات اللوجو والغلاف سحابياً -->
             <div class="card p-3 mb-3 bg-white border border-primary">
-              <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-store me-1"></i> إعدادات الهوية والغلاف (تأثير سحابي):</h6>
+              <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-store me-1"></i> تغيير اللوجو والغلاف سحابياً للجميع</h6>
               <div class="row g-2 mb-2">
                 <div class="col-md-6">
-                  <label class="small fw-bold text-muted">صورة اللوجو الشعار:</label>
+                  <label class="small fw-bold text-muted">صورة اللوجو:</label>
                   <input type="file" class="form-control mb-1" accept="image/*" onchange="compressLogo(this)">
                   <input type="text" id="settings-logo-url" placeholder="رابط اللوجو" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-6">
-                  <label class="small fw-bold text-muted">صورة بنر الغلاف العلوي:</label>
+                  <label class="small fw-bold text-muted">صورة الغلاف (Banner):</label>
                   <input type="file" class="form-control mb-1" accept="image/*" onchange="compressCover(this)">
                   <input type="text" id="settings-cover-url" placeholder="رابط الغلاف" class="form-control form-control-sm">
                 </div>
               </div>
-              <button onclick="saveStoreSettings()" class="btn btn-primary btn-sm w-100 fw-bold">حفظ اللوجو والغلاف سحابياً لجميع العملاء 🌐</button>
+              <button onclick="saveStoreSettings()" class="btn btn-primary btn-sm w-100 fw-bold">حفظ اللوجو والغلاف سحابياً 🌐</button>
             </div>
 
             <!-- إضافة وتعديل الأصناف -->
@@ -203,101 +203,21 @@
     let cart = [];
     let allProducts = [];
     let currentSelectedCategory = "الكل";
-    let adminPass = "123456";
+    let adminPass = localStorage.getItem("albaraa_pass") || "123456";
 
     let adminModal, cartModal;
 
     document.addEventListener("DOMContentLoaded", () => {
       adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
       cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-      loadStoreSettings();
+      
+      // تحميل الأصناف فوراً ودون انتظار أي شيء آخر
       loadProducts();
+      
+      // تحميل اللوجو والغلاف بشكل هادئ وسريع
+      loadStoreSettings();
     });
 
-    // جلب إعدادات اللوجو والغلاف سحابياً للجميع
-    async function loadStoreSettings() {
-      try {
-        const res = await fetch(SETTINGS_URL);
-        if (res.ok) {
-          const data = await res.json();
-          const fields = data.fields || {};
-          if (fields.logo && fields.logo.stringValue) {
-            document.getElementById('store-logo').src = fields.logo.stringValue;
-            document.getElementById('settings-logo-url').value = fields.logo.stringValue;
-          }
-          if (fields.cover && fields.cover.stringValue) {
-            document.getElementById('banner-box').style.backgroundImage = `url('${fields.cover.stringValue}')`;
-            document.getElementById('settings-cover-url').value = fields.cover.stringValue;
-          }
-        }
-      } catch (err) {
-        console.log("استخدام الإعدادات الافتراضية");
-      }
-    }
-
-    // حفظ اللوجو والغلاف سحابياً
-    async function saveStoreSettings() {
-      const logoUrl = document.getElementById('settings-logo-url').value;
-      const coverUrl = document.getElementById('settings-cover-url').value;
-
-      const payload = {
-        fields: {
-          logo: { stringValue: logoUrl },
-          cover: { stringValue: coverUrl }
-        }
-      };
-
-      try {
-        await fetch(SETTINGS_URL, {
-          method: 'PATCH',
-          body: JSON.stringify(payload)
-        });
-        alert("تم حفظ اللوجو والغلاف سحابياً بنجاح وسوف يظهران لكل العملاء!");
-        loadStoreSettings();
-      } catch (e) {
-        alert("حدث خطأ أثناء الحفظ السحابي!");
-      }
-    }
-
-    // ضغط اللوجو
-    function compressLogo(input) {
-      const file = input.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          canvas.width = 150; canvas.height = 150;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, 150, 150);
-          document.getElementById('settings-logo-url').value = canvas.toDataURL('image/jpeg', 0.6);
-        }
-      }
-      reader.readAsDataURL(file);
-    }
-
-    // ضغط الغلاف
-    function compressCover(input) {
-      const file = input.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          canvas.width = 600; canvas.height = 200;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, 600, 200);
-          document.getElementById('settings-cover-url').value = canvas.toDataURL('image/jpeg', 0.6);
-        }
-      }
-      reader.readAsDataURL(file);
-    }
-
-    // جلب المنتجات بشكل مباشر وسريع
     async function loadProducts() {
       try {
         const res = await fetch(FIRESTORE_URL);
@@ -326,6 +246,85 @@
         console.error(err);
         document.getElementById('products-grid').innerHTML = `<div class="col-12 text-center text-danger py-4">حدث خطأ في تحميل المنتجات، تأكد من اتصال الإنترنت.</div>`;
       }
+    }
+
+    async function loadStoreSettings() {
+      try {
+        const res = await fetch(SETTINGS_URL);
+        if (res.ok) {
+          const data = await res.json();
+          const fields = data.fields || {};
+          if (fields.logo && fields.logo.stringValue) {
+            document.getElementById('store-logo').src = fields.logo.stringValue;
+            document.getElementById('settings-logo-url').value = fields.logo.stringValue;
+          }
+          if (fields.cover && fields.cover.stringValue) {
+            document.getElementById('banner-box').style.backgroundImage = `url('${fields.cover.stringValue}')`;
+            document.getElementById('settings-cover-url').value = fields.cover.stringValue;
+          }
+        }
+      } catch (e) {
+        console.log("استخدام اللوجو والغلاف الافتراضي");
+      }
+    }
+
+    async function saveStoreSettings() {
+      const logoUrl = document.getElementById('settings-logo-url').value;
+      const coverUrl = document.getElementById('settings-cover-url').value;
+
+      const payload = {
+        fields: {
+          logo: { stringValue: logoUrl },
+          cover: { stringValue: coverUrl }
+        }
+      };
+
+      try {
+        await fetch(SETTINGS_URL, {
+          method: 'PATCH',
+          body: JSON.stringify(payload)
+        });
+        alert("تم حفظ اللوجو والغلاف سحابياً بنجاح!");
+        loadStoreSettings();
+      } catch (e) {
+        alert("حدث خطأ أثناء الحفظ السحابي!");
+      }
+    }
+
+    function compressLogo(input) {
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 150; canvas.height = 150;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 150, 150);
+          document.getElementById('settings-logo-url').value = canvas.toDataURL('image/jpeg', 0.6);
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+
+    function compressCover(input) {
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 600; canvas.height = 200;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 600, 200);
+          document.getElementById('settings-cover-url').value = canvas.toDataURL('image/jpeg', 0.6);
+        }
+      }
+      reader.readAsDataURL(file);
     }
 
     function renderProducts() {
@@ -424,3 +423,10 @@
         cartList.appendChild(div);
       });
     }
+
+    function openCartModal() {
+      renderCartModal();
+      cartModal.show();
+    }
+
+    function openA
