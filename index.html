@@ -55,9 +55,7 @@
     </div>
 
     <h5 class="fw-bold border-start border-4 border-danger ps-2 mb-3" id="category-title">قائمة المنتجات</h5>
-    <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2">
-      <div class="col-12 text-center text-muted py-5" id="loading-msg">جاري تحميل المنتجات... ⏳</div>
-    </div>
+    <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2"></div>
   </div>
 
   <!-- السلة السفلية -->
@@ -123,9 +121,9 @@
           
           <div id="admin-dashboard-view" class="d-none">
 
-            <!-- قسم إعدادات اللوجو والغلاف سحابياً -->
+            <!-- قسم إعدادات اللوجو والغلاف -->
             <div class="card p-3 mb-3 bg-white border border-primary">
-              <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-store me-1"></i> تغيير اللوجو والغلاف سحابياً للجميع</h6>
+              <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-store me-1"></i> تغيير اللوجو والغلاف</h6>
               <div class="row g-2 mb-2">
                 <div class="col-md-6">
                   <label class="small fw-bold text-muted">صورة اللوجو:</label>
@@ -138,7 +136,7 @@
                   <input type="text" id="settings-cover-url" placeholder="رابط الغلاف" class="form-control form-control-sm">
                 </div>
               </div>
-              <button onclick="saveStoreSettings()" class="btn btn-primary btn-sm w-100 fw-bold">حفظ اللوجو والغلاف سحابياً 🌐</button>
+              <button onclick="saveStoreSettings()" class="btn btn-primary btn-sm w-100 fw-bold">حفظ اللوجو والغلاف 🌐</button>
             </div>
 
             <!-- إضافة وتعديل الأصناف -->
@@ -195,24 +193,18 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- مكتبات Firebase الرسمية المستقرة -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
   <script>
-    // إعدادات مشروع الفايربيس الخاص بك
-    const firebaseConfig = {
-      projectId: "albaraameat-a6163"
-    };
-
-    // تهيئة الفايربيس
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.firestore();
+    // قائمة الأصناف الأساسية المضمونة
+    const defaultProducts = [
+      { id: "1", name: "لحم مفروم كاندوز", price: 280, weight: "1 كجم", category: "لحوم", img: "https://via.placeholder.com/150", available: true },
+      { id: "2", name: "كفتة حاتي جاهزة", price: 250, weight: "1 كجم", category: "مصنعات لحوم", img: "https://via.placeholder.com/150", available: true },
+      { id: "3", name: "برجر لحم بلدي", price: 260, weight: "1 كجم", category: "مصنعات لحوم", img: "https://via.placeholder.com/150", available: true },
+      { id: "4", name: "بانيه دجاج مقرمش", price: 220, weight: "1 كجم", category: "مصنعات فراخ", img: "https://via.placeholder.com/150", available: true },
+      { id: "5", name: "طبق مشكل البراء المميز", price: 300, weight: "1.5 كجم", category: "أطباق مشكل", img: "https://via.placeholder.com/150", available: true }
+    ];
 
     let cart = [];
-    let allProducts = [];
+    let allProducts = JSON.parse(localStorage.getItem("albaraa_products")) || defaultProducts;
     let currentSelectedCategory = "الكل";
     let adminPass = localStorage.getItem("albaraa_pass") || "123456";
 
@@ -222,70 +214,40 @@
       adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
       cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
       
-      loadProducts();
+      renderProducts();
+      renderAdminProductsList();
       loadStoreSettings();
     });
 
-    // جلب المنتجات باستخدام مكتبة SDK الرسمية
-    function loadProducts() {
-      db.collection("products").get().then((querySnapshot) => {
-        allProducts = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          allProducts.push({
-            id: doc.id,
-            name: data.name || "منتج بدون اسم",
-            price: Number(data.price) || 0,
-            weight: data.weight || "",
-            category: data.category || "لحوم",
-            img: data.img || "",
-            available: data.available !== undefined ? data.available : true
-          });
-        });
-        renderProducts();
-        renderAdminProductsList();
-      }).catch((error) => {
-        console.error("خطأ في جلب المنتجات: ", error);
-        document.getElementById('products-grid').innerHTML = `<div class="col-12 text-center text-danger py-4">حدث خطأ أثناء تحميل المنتجات.</div>`;
-      });
+    function saveProductsToStorage() {
+      localStorage.setItem("albaraa_products", JSON.stringify(allProducts));
     }
 
-    // جلب إعدادات اللوجو والغلاف
     function loadStoreSettings() {
-      db.collection("settings").doc("store").get().then((doc) => {
-        if (doc.exists) {
-          const data = doc.data();
-          if (data.logo) {
-            document.getElementById('store-logo').src = data.logo;
-            document.getElementById('settings-logo-url').value = data.logo;
-          }
-          if (data.cover) {
-            document.getElementById('banner-box').style.backgroundImage = `url('${data.cover}')`;
-            document.getElementById('settings-cover-url').value = data.cover;
-          }
-        }
-      }).catch((e) => {
-        console.log("استخدام الإعدادات الافتراضية");
-      });
+      const logo = localStorage.getItem("albaraa_logo");
+      const cover = localStorage.getItem("albaraa_cover");
+
+      if (logo) {
+        document.getElementById('store-logo').src = logo;
+        document.getElementById('settings-logo-url').value = logo;
+      }
+      if (cover) {
+        document.getElementById('banner-box').style.backgroundImage = `url('${cover}')`;
+        document.getElementById('settings-cover-url').value = cover;
+      }
     }
 
-    // حفظ اللوجو والغلاف سحابياً
     function saveStoreSettings() {
       const logoUrl = document.getElementById('settings-logo-url').value;
       const coverUrl = document.getElementById('settings-cover-url').value;
 
-      db.collection("settings").doc("store").set({
-        logo: logoUrl,
-        cover: coverUrl
-      }, { merge: true }).then(() => {
-        alert("تم حفظ اللوجو والغلاف سحابياً بنجاح وسوف يظهران للجميع!");
-        loadStoreSettings();
-      }).catch(() => {
-        alert("حدث خطأ أثناء الحفظ!");
-      });
+      if(logoUrl) localStorage.setItem("albaraa_logo", logoUrl);
+      if(coverUrl) localStorage.setItem("albaraa_cover", coverUrl);
+
+      alert("تم حفظ اللوجو والغلاف بنجاح!");
+      loadStoreSettings();
     }
 
-    // ضغط الصور
     function compressLogo(input) {
       const file = input.files[0];
       if(!file) return;
@@ -431,4 +393,33 @@
             <button class="btn btn-outline-danger" onclick="changeQuantity(${index}, -1)">-</button>
             <span class="btn btn-light disabled px-2 fw-bold text-dark">${item.count}</span>
             <button class="btn btn-outline-success" onclick="changeQuantity(${index}, 1)">+</button>
-        
+          </div>
+        `;
+        cartList.appendChild(div);
+      });
+    }
+
+    function openCartModal() {
+      renderCartModal();
+      cartModal.show();
+    }
+
+    function openAdminModal() {
+      adminModal.show();
+    }
+
+    function sendOrderToWhatsApp() {
+      if (cart.length === 0) return alert("السلة فارغة!");
+
+      const name = document.getElementById('cust-name').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+      const address = document.getElementById('cust-address').value.trim();
+
+      if (!name || !phone || !address) {
+        return alert("يرجى ملء جميع البيانات المطلوب للحجز!");
+      }
+
+      let text = `🛒 *طلب جديد من الموقع الإلكتروني*\n\n`;
+      text += `👤 *الاسم:* ${name}\n`;
+      text += `📞 *الهاتف:* ${phone}\n`;
+      text += `📍 *العنوان:
