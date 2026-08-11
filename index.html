@@ -11,9 +11,9 @@
     .header-bg { background-color: #8b0000; color: white; }
     .card-product { border-radius: 12px; border: 1px solid #e0e0e0; background: #fff; overflow: hidden; }
     .product-img { height: 130px; object-fit: cover; width: 100%; }
-    .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; }
+    .logo-img { height: 45px; width: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #ffc107; background-color: #fff; }
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #ddd; z-index: 1000; padding: 10px; }
-    .banner-box { background: linear-gradient(135deg, #8b0000, #d9534f); color: white; border-radius: 12px; padding: 15px; text-align: center; background-size: cover; background-position: center; }
+    .banner-box { background: linear-gradient(135deg, #8b0000, #d9534f); color: white; border-radius: 12px; padding: 15px; text-align: center; background-size: cover; background-position: center; transition: all 0.3s ease; }
   </style>
 </head>
 <body>
@@ -40,7 +40,7 @@
   <!-- بنر الترحيب والعروض -->
   <div class="container mt-3">
     <div class="banner-box shadow-sm" id="banner-box">
-      <h6 class="m-0 fw-bold">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
+      <h6 class="m-0 fw-bold" id="banner-text">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
     </div>
   </div>
 
@@ -122,9 +122,28 @@
           </div>
           
           <div id="admin-dashboard-view" class="d-none">
-            <!-- إضافة وتعديل أصناف -->
+
+            <!-- قسم إعدادات المتجر السحابية (اللوجو والغلاف) -->
+            <div class="card p-3 mb-3 bg-white border border-primary">
+              <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-store me-1"></i> إعدادات الهوية والغلاف (تأثير سحابي):</h6>
+              <div class="row g-2 mb-2">
+                <div class="col-md-6">
+                  <label class="small fw-bold text-muted">صورة اللوجو الشعار:</label>
+                  <input type="file" class="form-control mb-1" accept="image/*" onchange="compressLogo(this)">
+                  <input type="text" id="settings-logo-url" placeholder="رابط اللوجو" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-6">
+                  <label class="small fw-bold text-muted">صورة بنر الغلاف العلوي:</label>
+                  <input type="file" class="form-control mb-1" accept="image/*" onchange="compressCover(this)">
+                  <input type="text" id="settings-cover-url" placeholder="رابط الغلاف" class="form-control form-control-sm">
+                </div>
+              </div>
+              <button onclick="saveStoreSettings()" class="btn btn-primary btn-sm w-100 fw-bold">حفظ اللوجو والغلاف سحابياً لجميع العملاء 🌐</button>
+            </div>
+
+            <!-- إضافة وتعديل الأصناف -->
             <div class="card p-3 mb-3 bg-light">
-              <h6 class="fw-bold text-primary mb-2" id="form-title">إضافة منتج جديد</h6>
+              <h6 class="fw-bold text-success mb-2" id="form-title">إضافة منتج جديد</h6>
               <input type="hidden" id="edit-doc-id">
               <input type="text" id="p-name" placeholder="اسم المنتج" class="form-control mb-2">
               <div class="row g-2 mb-2">
@@ -143,8 +162,8 @@
               </div>
 
               <div class="mb-2">
-                <label class="small fw-bold text-muted">صورة المنتج (رفع ضغط تلقائي أو رابط):</label>
-                <input type="file" class="form-control mb-1" accept="image/*" onchange="compressImage(this, 'p-img-url')">
+                <label class="small text-muted fw-bold">صورة المنتج (مضغوطة تلقائياً):</label>
+                <input type="file" id="p-img-file" class="form-control mb-1" accept="image/*" onchange="uploadCompressedImage(this)">
                 <input type="text" id="p-img-url" placeholder="رابط صورة أونلاين" class="form-control">
               </div>
 
@@ -156,21 +175,12 @@
               <button onclick="resetForm()" class="btn btn-outline-secondary w-100 btn-sm">إلغاء التعديل</button>
             </div>
 
-            <!-- إعدادات الباسورد والغلاف -->
-            <div class="card p-3 mb-3 border-danger bg-light">
-              <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-gear"></i> إعدادات اللوحة والغلاف</h6>
-              <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                  <input type="password" id="new-admin-pass" class="form-control" placeholder="كلمة سر جديدة">
-                </div>
-                <div class="col-md-6">
-                  <button onclick="changePassword()" class="btn btn-outline-danger w-100 fw-bold">تغيير الباسورد</button>
-                </div>
-              </div>
-              <hr class="my-2">
-              <div class="mb-2">
-                <label class="small fw-bold">تغيير صورة الغلاف (Banner):</label>
-                <input type="file" class="form-control" accept="image/*" onchange="compressAndSetCover(this)">
+            <!-- تغيير كلمة السر -->
+            <div class="card p-3 mb-3 bg-white border">
+              <h6 class="fw-bold text-dark mb-2">تغيير كلمة سر اللوحة:</h6>
+              <div class="input-group">
+                <input type="password" id="new-pass-input" placeholder="كلمة السر الجديدة" class="form-control">
+                <button onclick="changeAdminPassword()" class="btn btn-outline-danger">تحديث</button>
               </div>
             </div>
 
@@ -188,24 +198,106 @@
   <script>
     const PROJECT_ID = "albaraameat-a6163";
     const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/products`;
+    const SETTINGS_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/settings/store`;
 
     let cart = [];
     let allProducts = [];
     let currentSelectedCategory = "الكل";
-    let adminPass = localStorage.getItem("albaraa_pass") || "123456";
+    let adminPass = "123456";
 
     let adminModal, cartModal;
 
     document.addEventListener("DOMContentLoaded", () => {
       adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
       cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-      
-      const savedCover = localStorage.getItem("albaraa_cover");
-      if(savedCover) document.getElementById('banner-box').style.backgroundImage = `url('${savedCover}')`;
-      
+      loadStoreSettings();
       loadProducts();
     });
 
+    // جلب إعدادات اللوجو والغلاف سحابياً للجميع
+    async function loadStoreSettings() {
+      try {
+        const res = await fetch(SETTINGS_URL);
+        if (res.ok) {
+          const data = await res.json();
+          const fields = data.fields || {};
+          if (fields.logo && fields.logo.stringValue) {
+            document.getElementById('store-logo').src = fields.logo.stringValue;
+            document.getElementById('settings-logo-url').value = fields.logo.stringValue;
+          }
+          if (fields.cover && fields.cover.stringValue) {
+            document.getElementById('banner-box').style.backgroundImage = `url('${fields.cover.stringValue}')`;
+            document.getElementById('settings-cover-url').value = fields.cover.stringValue;
+          }
+        }
+      } catch (err) {
+        console.log("استخدام الإعدادات الافتراضية");
+      }
+    }
+
+    // حفظ اللوجو والغلاف سحابياً
+    async function saveStoreSettings() {
+      const logoUrl = document.getElementById('settings-logo-url').value;
+      const coverUrl = document.getElementById('settings-cover-url').value;
+
+      const payload = {
+        fields: {
+          logo: { stringValue: logoUrl },
+          cover: { stringValue: coverUrl }
+        }
+      };
+
+      try {
+        await fetch(SETTINGS_URL, {
+          method: 'PATCH',
+          body: JSON.stringify(payload)
+        });
+        alert("تم حفظ اللوجو والغلاف سحابياً بنجاح وسوف يظهران لكل العملاء!");
+        loadStoreSettings();
+      } catch (e) {
+        alert("حدث خطأ أثناء الحفظ السحابي!");
+      }
+    }
+
+    // ضغط اللوجو
+    function compressLogo(input) {
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 150; canvas.height = 150;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 150, 150);
+          document.getElementById('settings-logo-url').value = canvas.toDataURL('image/jpeg', 0.6);
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+
+    // ضغط الغلاف
+    function compressCover(input) {
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 600; canvas.height = 200;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 600, 200);
+          document.getElementById('settings-cover-url').value = canvas.toDataURL('image/jpeg', 0.6);
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+
+    // جلب المنتجات بشكل مباشر وسريع
     async function loadProducts() {
       try {
         const res = await fetch(FIRESTORE_URL);
@@ -332,109 +424,3 @@
         cartList.appendChild(div);
       });
     }
-
-    function openCartModal() {
-      renderCartModal();
-      cartModal.show();
-    }
-
-    function openAdminModal() {
-      adminModal.show();
-    }
-
-    function sendOrderToWhatsApp() {
-      if (cart.length === 0) return alert("السلة فارغة!");
-
-      const name = document.getElementById('cust-name').value.trim();
-      const phone = document.getElementById('cust-phone').value.trim();
-      const address = document.getElementById('cust-address').value.trim();
-
-      if (!name || !phone || !address) {
-        return alert("يرجى ملء جميع البيانات المطلوب للحجز!");
-      }
-
-      let text = `🛒 *طلب جديد من الموقع الإلكتروني*\n\n`;
-      text += `👤 *الاسم:* ${name}\n`;
-      text += `📞 *الهاتف:* ${phone}\n`;
-      text += `📍 *العنوان:* ${address}\n`;
-      text += `------------------------------\n`;
-      text += `📦 *المنتجات:* \n`;
-
-      cart.forEach((item, index) => { 
-        text += `${index + 1}. ${item.name} (${item.count}) - ${item.price * item.count} ج.م\n`; 
-      });
-
-      const total = cart.reduce((sum, item) => sum + (item.price * item.count), 0);
-      text += `------------------------------\n`;
-      text += `💰 *الإجمالي النهائي:* ${total} ج.م`;
-
-      window.open(`https://wa.me/201004496451?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    function loginAdmin() {
-      const inputPass = document.getElementById('admin-pass').value;
-      if (inputPass === adminPass) {
-        document.getElementById('admin-login-view').classList.add('d-none');
-        document.getElementById('admin-dashboard-view').classList.remove('d-none');
-      } else {
-        alert("كلمة السر خاطئة!");
-      }
-    }
-
-    function logoutAdmin() {
-      document.getElementById('admin-login-view').classList.remove('d-none');
-      document.getElementById('admin-dashboard-view').classList.add('d-none');
-      document.getElementById('admin-pass').value = '';
-    }
-
-    function changePassword() {
-      const p = document.getElementById('new-admin-pass').value.trim();
-      if(!p) return alert("اكتب الباسورد الجديد الأول!");
-      adminPass = p;
-      localStorage.setItem("albaraa_pass", p);
-      alert("تم تغيير كلمة السر بنجاح!");
-      document.getElementById('new-admin-pass').value = '';
-    }
-
-    function compressImage(input, targetId) {
-      const file = input.files[0];
-      if(!file) return;
-      const r = new FileReader();
-      r.onload = e => {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = () => {
-          const cvs = document.createElement('canvas');
-          cvs.width = 500; cvs.height = 500;
-          cvs.getContext('2d').drawImage(img, 0, 0, 500, 500);
-          document.getElementById(targetId).value = cvs.toDataURL('image/jpeg', 0.6);
-        }
-      }
-      r.readAsDataURL(file);
-    }
-
-    function compressAndSetCover(input) {
-      const file = input.files[0];
-      if(!file) return;
-      const r = new FileReader();
-      r.onload = e => {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = () => {
-          const cvs = document.createElement('canvas');
-          cvs.width = 800; cvs.height = 300;
-          cvs.getContext('2d').drawImage(img, 0, 0, 800, 300);
-          const data = cvs.toDataURL('image/jpeg', 0.7);
-          localStorage.setItem("albaraa_cover", data);
-          document.getElementById('banner-box').style.backgroundImage = `url('${data}')`;
-          alert("تم تغيير الغلاف بنجاح!");
-        }
-      }
-      r.readAsDataURL(file);
-    }
-
-    function renderAdminProductsList() {
-      const adminList = document.getElementById('admin-products-list');
-      adminList.innerHTML = '';
-      allProducts.forEach(p => {
-        const item
