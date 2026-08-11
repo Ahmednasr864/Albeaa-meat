@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { background-color: #f8f9fa; font-family: sans-serif; padding-bottom: 90px; }
+    body { background-color: #f8f9fa; font-family: system-ui, -apple-system, sans-serif; padding-bottom: 90px; }
     .header-bg { background-color: #8b0000; color: white; }
     .card-product { border-radius: 12px; border: 1px solid #e0e0e0; background: #fff; overflow: hidden; }
     .product-img { height: 130px; object-fit: cover; width: 100%; }
@@ -37,7 +37,7 @@
     </div>
   </header>
 
-  <!-- بنر الترحيب والعروض -->
+  <!-- بنر الترحيب -->
   <div class="container mt-3">
     <div class="banner-box shadow-sm" id="banner-box">
       <h6 class="m-0 fw-bold">🥩 أهلاً بكم في متجر البراء للحوم المجمدة والمصنعات ✨</h6>
@@ -55,7 +55,9 @@
     </div>
 
     <h5 class="fw-bold border-start border-4 border-danger ps-2 mb-3" id="category-title">قائمة المنتجات</h5>
-    <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2"></div>
+    <div id="products-grid" class="row row-cols-2 row-cols-md-4 g-2">
+      <div class="col-12 text-center text-muted py-5" id="loading-msg">جاري تحميل المنتجات السحابية... ⏳</div>
+    </div>
   </div>
 
   <!-- السلة السفلية -->
@@ -82,12 +84,10 @@
         </div>
         <div class="modal-body">
           <div id="cart-items-list" class="mb-3"></div>
-
           <div class="d-flex justify-content-between align-items-center fw-bold border-top pt-2 mb-3">
             <span>الإجمالي:</span>
             <span id="cart-modal-total" class="text-danger h5 m-0">0 ج.م</span>
           </div>
-
           <div class="card p-3 bg-light border-0">
             <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-user me-1 text-danger"></i> بيانات الحجز والتوصيل:</h6>
             <input type="text" id="cust-name" class="form-control mb-2" placeholder="الاسم بالكامل *">
@@ -110,38 +110,20 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title text-danger fw-bold">لوحة تحكم المحل</h5>
+          <h5 class="modal-title text-danger fw-bold">لوحة تحكم المحل (ربط سحابي)</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <div id="admin-login-view">
-            <input type="password" id="admin-pass" placeholder="كلمة السر" class="form-control mb-2">
+            <input type="password" id="admin-pass" placeholder="كلمة السر (الافتراضية: 123456)" class="form-control mb-2">
             <button onclick="loginAdmin()" class="btn btn-danger w-100 fw-bold">دخول</button>
           </div>
           
           <div id="admin-dashboard-view" class="d-none">
 
-            <!-- قسم إعدادات اللوجو والغلاف -->
-            <div class="card p-3 mb-3 bg-white border border-primary">
-              <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-store me-1"></i> تغيير اللوجو والغلاف</h6>
-              <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                  <label class="small fw-bold text-muted">صورة اللوجو:</label>
-                  <input type="file" class="form-control mb-1" accept="image/*" onchange="compressLogo(this)">
-                  <input type="text" id="settings-logo-url" placeholder="رابط اللوجو" class="form-control form-control-sm">
-                </div>
-                <div class="col-md-6">
-                  <label class="small fw-bold text-muted">صورة الغلاف (Banner):</label>
-                  <input type="file" class="form-control mb-1" accept="image/*" onchange="compressCover(this)">
-                  <input type="text" id="settings-cover-url" placeholder="رابط الغلاف" class="form-control form-control-sm">
-                </div>
-              </div>
-              <button onclick="saveStoreSettings()" class="btn btn-primary btn-sm w-100 fw-bold">حفظ اللوجو والغلاف 🌐</button>
-            </div>
-
-            <!-- إضافة وتعديل الأصناف -->
+            <!-- إضافة وتعديل الأصناف سحابياً -->
             <div class="card p-3 mb-3 bg-light">
-              <h6 class="fw-bold text-success mb-2" id="form-title">إضافة منتج جديد</h6>
+              <h6 class="fw-bold text-success mb-2" id="form-title">إضافة منتج جديد سحابياً</h6>
               <input type="hidden" id="edit-doc-id">
               <input type="text" id="p-name" placeholder="اسم المنتج" class="form-control mb-2">
               <div class="row g-2 mb-2">
@@ -160,17 +142,16 @@
               </div>
 
               <div class="mb-2">
-                <label class="small text-muted fw-bold">صورة المنتج (مضغوطة تلقائياً):</label>
-                <input type="file" id="p-img-file" class="form-control mb-1" accept="image/*" onchange="uploadCompressedImage(this)">
-                <input type="text" id="p-img-url" placeholder="رابط صورة أونلاين" class="form-control">
+                <label class="small text-muted fw-bold">رابط صورة المنتج:</label>
+                <input type="text" id="p-img-url" placeholder="رابط الصورة أونلاين" class="form-control">
               </div>
 
               <div class="form-check mb-2">
                 <input class="form-check-input" type="checkbox" id="p-available" checked>
                 <label class="form-check-label">متوفر للبيع 🟢</label>
               </div>
-              <button onclick="saveProduct()" class="btn btn-success w-100 fw-bold mb-2">حفظ المنتج بسرعة 🚀</button>
-              <button onclick="resetForm()" class="btn btn-outline-secondary w-100 btn-sm">إلغاء التعديل</button>
+              <button onclick="saveProductCloud()" class="btn btn-success w-100 fw-bold mb-2">حفظ المنتج سحابياً 🚀</button>
+              <button onclick="resetForm()" class="btn btn-outline-secondary w-100 btn-sm">إلغاء</button>
             </div>
 
             <!-- تغيير كلمة السر -->
@@ -194,17 +175,19 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // قائمة الأصناف الأساسية المضمونة
-    const defaultProducts = [
-      { id: "1", name: "لحم مفروم كاندوز", price: 280, weight: "1 كجم", category: "لحوم", img: "https://via.placeholder.com/150", available: true },
-      { id: "2", name: "كفتة حاتي جاهزة", price: 250, weight: "1 كجم", category: "مصنعات لحوم", img: "https://via.placeholder.com/150", available: true },
-      { id: "3", name: "برجر لحم بلدي", price: 260, weight: "1 كجم", category: "مصنعات لحوم", img: "https://via.placeholder.com/150", available: true },
-      { id: "4", name: "بانيه دجاج مقرمش", price: 220, weight: "1 كجم", category: "مصنعات فراخ", img: "https://via.placeholder.com/150", available: true },
-      { id: "5", name: "طبق مشكل البراء المميز", price: 300, weight: "1.5 كجم", category: "أطباق مشكل", img: "https://via.placeholder.com/150", available: true }
+    const PROJECT_ID = "albaraameat-a6163";
+    const REST_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/products`;
+
+    // قائمة احتياطية نضمن بيها إن المتجر عمره ما يفتح فاضي
+    const backupProducts = [
+      { id: "b1", name: "لحم مفروم كاندوز", price: 280, weight: "1 كجم", category: "لحوم", img: "https://via.placeholder.com/150", available: true },
+      { id: "b2", name: "كفتة حاتي جاهزة", price: 250, weight: "1 كجم", category: "مصنعات لحوم", img: "https://via.placeholder.com/150", available: true },
+      { id: "b3", name: "برجر لحم بلدي", price: 260, weight: "1 كجم", category: "مصنعات لحوم", img: "https://via.placeholder.com/150", available: true },
+      { id: "b4", name: "بانيه دجاج مقرمش", price: 220, weight: "1 كجم", category: "مصنعات فراخ", img: "https://via.placeholder.com/150", available: true }
     ];
 
     let cart = [];
-    let allProducts = JSON.parse(localStorage.getItem("albaraa_products")) || defaultProducts;
+    let allProducts = [];
     let currentSelectedCategory = "الكل";
     let adminPass = localStorage.getItem("albaraa_pass") || "123456";
 
@@ -214,92 +197,41 @@
       adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
       cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
       
-      renderProducts();
-      renderAdminProductsList();
-      loadStoreSettings();
+      loadProductsFromCloud();
     });
 
-    function saveProductsToStorage() {
-      localStorage.setItem("albaraa_products", JSON.stringify(allProducts));
-    }
-
-    function loadStoreSettings() {
-      const logo = localStorage.getItem("albaraa_logo");
-      const cover = localStorage.getItem("albaraa_cover");
-
-      if (logo) {
-        document.getElementById('store-logo').src = logo;
-        document.getElementById('settings-logo-url').value = logo;
-      }
-      if (cover) {
-        document.getElementById('banner-box').style.backgroundImage = `url('${cover}')`;
-        document.getElementById('settings-cover-url').value = cover;
-      }
-    }
-
-    function saveStoreSettings() {
-      const logoUrl = document.getElementById('settings-logo-url').value;
-      const coverUrl = document.getElementById('settings-cover-url').value;
-
-      if(logoUrl) localStorage.setItem("albaraa_logo", logoUrl);
-      if(coverUrl) localStorage.setItem("albaraa_cover", coverUrl);
-
-      alert("تم حفظ اللوجو والغلاف بنجاح!");
-      loadStoreSettings();
-    }
-
-    function compressLogo(input) {
-      const file = input.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          canvas.width = 150; canvas.height = 150;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, 150, 150);
-          document.getElementById('settings-logo-url').value = canvas.toDataURL('image/jpeg', 0.6);
+    // جلب المنتجات من الفايربيس السحابي
+    async function loadProductsFromCloud() {
+      try {
+        const res = await fetch(REST_URL);
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        const data = await res.json();
+        
+        if (data.documents && data.documents.length > 0) {
+          allProducts = data.documents.map(doc => {
+            const fields = doc.fields || {};
+            const pathParts = doc.name.split('/');
+            return {
+              id: pathParts[pathParts.length - 1],
+              name: fields.name?.stringValue || "منتج بدون اسم",
+              price: Number(fields.price?.integerValue || fields.price?.doubleValue || 0),
+              weight: fields.weight?.stringValue || "",
+              category: fields.category?.stringValue || "لحوم",
+              img: fields.img?.stringValue || "https://via.placeholder.com/150",
+              available: fields.available?.booleanValue !== undefined ? fields.available.booleanValue : true
+            };
+          });
+        } else {
+          // لو السيرفر فاضي تماماً نزل الاحتياطي
+          allProducts = backupProducts;
         }
+      } catch (err) {
+        console.warn("تعذر جلب السيرفر، استخدام المنتجات المحلية:", err);
+        allProducts = JSON.parse(localStorage.getItem("albaraa_local_products")) || backupProducts;
       }
-      reader.readAsDataURL(file);
-    }
 
-    function compressCover(input) {
-      const file = input.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          canvas.width = 600; canvas.height = 200;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, 600, 200);
-          document.getElementById('settings-cover-url').value = canvas.toDataURL('image/jpeg', 0.6);
-        }
-      }
-      reader.readAsDataURL(file);
-    }
-
-    function uploadCompressedImage(input) {
-      const file = input.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          canvas.width = 300; canvas.height = 300;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, 300, 300);
-          document.getElementById('p-img-url').value = canvas.toDataURL('image/jpeg', 0.5);
-        }
-      }
-      reader.readAsDataURL(file);
+      renderProducts();
+      renderAdminProductsList();
     }
 
     function renderProducts() {
@@ -311,7 +243,7 @@
         : allProducts.filter(p => p.category === currentSelectedCategory);
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-12 text-center text-muted py-4">لا توجد منتجات حالياً في هذا القسم.</div>`;
+        grid.innerHTML = `<div class="col-12 text-center text-muted py-4">لا توجد منتجات متوفرة حالياً في هذا القسم.</div>`;
         return;
       }
 
@@ -416,10 +348,78 @@
       const address = document.getElementById('cust-address').value.trim();
 
       if (!name || !phone || !address) {
-        return alert("يرجى ملء جميع البيانات المطلوب للحجز!");
+        return alert("يرجى ملء جميع البيانات للطلب!");
       }
 
-      let text = `🛒 *طلب جديد من الموقع الإلكتروني*\n\n`;
+      let text = `🛒 *طلب جديد من المتجر*\n\n`;
       text += `👤 *الاسم:* ${name}\n`;
       text += `📞 *الهاتف:* ${phone}\n`;
-      text += `📍 *العنوان:
+      text += `📍 *العنوان:* ${address}\n`;
+      text += `------------------------------\n`;
+      text += `📦 *المنتجات:* \n`;
+
+      cart.forEach((item, index) => { 
+        text += `${index + 1}. ${item.name} (${item.count}) - ${item.price * item.count} ج.م\n`; 
+      });
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.count), 0);
+      text += `------------------------------\n`;
+      text += `💰 *الإجمالي النهائي:* ${total} ج.م`;
+
+      window.open(`https://wa.me/201004496451?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function loginAdmin() {
+      const inputPass = document.getElementById('admin-pass').value;
+      if (inputPass === adminPass) {
+        document.getElementById('admin-login-view').classList.add('d-none');
+        document.getElementById('admin-dashboard-view').classList.remove('d-none');
+      } else {
+        alert("كلمة السر خاطئة!");
+      }
+    }
+
+    function logoutAdmin() {
+      document.getElementById('admin-login-view').classList.remove('d-none');
+      document.getElementById('admin-dashboard-view').classList.add('d-none');
+      document.getElementById('admin-pass').value = '';
+    }
+
+    function changeAdminPassword() {
+      const p = document.getElementById('new-pass-input').value.trim();
+      if(!p) return alert("أدخل كلمة السر الجديدة!");
+      adminPass = p;
+      localStorage.setItem("albaraa_pass", p);
+      alert("تم تغيير كلمة السر بنجاح!");
+      document.getElementById('new-pass-input').value = '';
+    }
+
+    function renderAdminProductsList() {
+      const adminList = document.getElementById('admin-products-list');
+      adminList.innerHTML = '';
+      allProducts.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item d-flex justify-content-between align-items-center';
+        item.innerHTML = `
+          <div>
+            <strong>${p.name}</strong> (${p.category}) - <span class="text-danger">${p.price} ج.م</span>
+          </div>
+          <div>
+            <button class="btn btn-danger btn-sm" onclick="deleteProductCloud('${p.id}')"><i class="fa-solid fa-trash"></i> حذف</button>
+          </div>`;
+        adminList.appendChild(item);
+      });
+    }
+
+    // حفظ المنتج سحابياً مباشرة
+    async function saveProductCloud() {
+      const name = document.getElementById('p-name').value.trim();
+      const price = Number(document.getElementById('p-price').value);
+      const weight = document.getElementById('p-weight').value.trim();
+      const category = document.getElementById('p-category').value;
+      const available = document.getElementById('p-available').checked;
+      const img = document.getElementById('p-img-url').value.trim();
+
+      if (!name || !price) return alert("يرجى كتابة الاسم والسعر!");
+
+      const payload =
